@@ -1,16 +1,16 @@
 
 # G-DAESpec
-<div align="center">
-  <img src="G-DAE_logo.png" alt="G-DAESpec Logo" width="600"/>
-</div>
-
-
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Powered by MultiREx](https://img.shields.io/badge/Powered%20by-MultiREx-blueviolet)](https://github.com/D4san/MultiREx-public)
 [![Powered by POSEIDON](https://img.shields.io/badge/Powered%20by-POSEIDON-007ec6)](https://github.com/MartianColonist/POSEIDON)
 [![Powered by TauREx 3](https://img.shields.io/badge/Powered%20by-TauREx%203-red)](https://github.com/ucl-exoplanets/TauREx3_public)
+
+<div align="center">
+  <img src="G-DAE_logo.png" alt="G-DAESpec Logo" width="600"/>
+</div>
+
 
 ## Overview
 
