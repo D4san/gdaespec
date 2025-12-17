@@ -1,29 +1,51 @@
-# gdaeaspec
+# MultiREx: Machine-Assisted Biosignature Classification in Earth-like Exoplanets
 
-## Overview
+## Abstract
 
-This repository contains tools and models for the analysis of astronomical spectra, with a focus on Earth-like atmospheres and stellar contamination. The project utilizes Machine Learning techniques, including Autoencoders (AE) and Random Forests (RF), to process and analyze spectral data.
+This repository hosts the computational framework and datasets associated with the research on classifying potential biosignatures in Earth-like exoplanets. The study leverages deep learning techniques, specifically AutoEncoders (AE), to analyze low signal-to-noise ratio (SNR) transmission spectra. By reducing the dimensionality of spectral data, we aim to efficiently identify atmospheric components such as $H_2O$, $CH_4$, and $O_3$ amidst stellar contamination and instrumental noise.
 
-## Features
+## Description
 
-- **Spectral Analysis**: Tools for processing and analyzing spectral data (e.g., `01_pandexo_spec_analysis.ipynb`, `02_spec_data.ipynb`).
-- **Stellar Contamination**: Analysis of stellar contamination (e.g., `02_stellar_contamination_epsilon.ipynb`).
-- **Machine Learning Models**:
-  - **Autoencoders (AE)**: Trained models and notebooks for dimensionality reduction and feature extraction (e.g., `03_AE.ipynb`, `AE.keras`).
-  - **Random Forests (RF)**: Models for regression or classification tasks involving specific molecules like CH4, H2O, and O3 (e.g., `04_CH4_RF.ipynb`, `04_H2O_RF.ipynb`, `04_O3_RF.ipynb`).
-- **Data**: Includes synthetic or observational spectral data (e.g., Phoenix models).
+The project focuses on:
+1.  **Spectra Generation**: Simulating transmission spectra for Earth-like atmospheres with varying concentrations of biosignatures.
+2.  **Stellar Contamination**: Modeling the impact of stellar spots and faculae on the observed spectra.
+3.  **Dimensionality Reduction**: Training AutoEncoders to compress spectral data while retaining essential features for classification.
+4.  **Retrieval Analysis**: Validating the machine learning approach against traditional atmospheric retrieval methods (using POSEIDON).
 
-## Structure
+## Repository Structure
 
-The main work is located in the `Earth_like_Atmosphere/` directory, which contains:
-- `Models/`: Saved Keras models.
-- `Phoenix/`: Stellar spectra files (BT-Settl models).
-- Notebooks for data analysis, model training, and evaluation.
+The core resources are located in the `Earth_like_Atmosphere/` directory:
 
-## Author
+### Data Preparation
+- **`02_spec_data.ipynb`**: Notebook for generating the transmission spectra dataset used for training and testing.
+- **`02_stellar_contamination_epsilon.ipynb`**: Computes the contamination factors ($\epsilon$) arising from stellar heterogeneity (spots and faculae).
 
-**David Santiago Duque Castaño**
+### Modeling (Deep Learning)
+- **`Models/`**: Directory containing:
+  - `03_AE.ipynb`: The training pipeline for the AutoEncoder architecture.
+  - Saved Keras models (`AE.keras`, `AE_l2.keras`).
+
+### Uncertainty & Simulation
+- **`AE pandexo_incertidumbres_final.ipynb`**: Analysis incorporating Pandexo simulations to account for observational uncertainties and instrument noise (e.g., JWST NIRSpec/MIRI).
+
+### Validation
+- **`Retreival Tests/`**: Contains outputs from atmospheric retrieval experiments, including nested sampling results (MultiNest) and corner plots comparing retrieved parameters against ground truths.
+
+## Requirements
+
+To replicate the experiments, the following Python packages are required:
+
+- `tensorflow` / `keras` (for AutoEncoders)
+- `pandexo` (for instrument simulation)
+- `poseidon` (for atmospheric retrieval)
+- `scikit-learn`
+- `plotly`
+- `numpy`, `pandas`, `matplotlib`
+
+## Citation
+
+If you use this code or data in your research, please refer to the associated publication (insert link/DOI here).
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[MIT License](LICENSE)
