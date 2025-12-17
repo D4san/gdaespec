@@ -8,7 +8,7 @@
 [![Powered by TauREx 3](https://img.shields.io/badge/Powered%20by-TauREx%203-red)](https://github.com/ucl-exoplanets/TauREx3_public)
 
 <div align="center">
-  <img src="G-DAE_logo.png" alt="G-DAESpec Logo" width="600"/>
+  <img src="G-DAE_logo.webp" alt="G-DAESpec Logo" width="600"/>
 </div>
 
 
