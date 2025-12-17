@@ -1,43 +1,55 @@
-# MultiREx: Machine-Assisted Biosignature Classification in Earth-like Exoplanets
+# MultiREx: Machine-Assisted Biosignature Classification in Exoplanet Atmospheres
 
 ## Abstract
 
-This repository hosts the computational framework and datasets associated with the research on classifying potential biosignatures in Earth-like exoplanets. The study leverages deep learning techniques, specifically AutoEncoders (AE), to analyze low signal-to-noise ratio (SNR) transmission spectra. By reducing the dimensionality of spectral data, we aim to efficiently identify atmospheric components such as $H_2O$, $CH_4$, and $O_3$ amidst stellar contamination and instrumental noise.
+This repository hosts the computational framework and datasets associated with the research on classifying potential biosignatures and atmospheric compositions in exoplanets. The study leverages deep learning techniques, specifically AutoEncoders (AE), to analyze low signal-to-noise ratio (SNR) transmission spectra of both Earth-like and Sub-Neptune planets. By reducing the dimensionality of spectral data, we aim to efficiently identify atmospheric components (e.g., $H_2O$, $CH_4$, $O_3$) amidst stellar contamination and instrumental noise.
 
 ## Description
 
 The project focuses on:
-1.  **Spectra Generation**: Simulating transmission spectra for Earth-like atmospheres with varying concentrations of biosignatures.
+1.  **Spectra Generation**: Simulating transmission spectra for Earth-like (e.g., TRAPPIST-1e) and Sub-Neptune (e.g., K2-18b) atmospheres.
 2.  **Stellar Contamination**: Modeling the impact of stellar spots and faculae on the observed spectra.
 3.  **Dimensionality Reduction**: Training AutoEncoders to compress spectral data while retaining essential features for classification.
 4.  **Retrieval Analysis**: Validating the machine learning approach against traditional atmospheric retrieval methods (using POSEIDON).
 
 ## Repository Structure
 
-The core resources are located in the `Earth_like_Atmosphere/` directory:
+The project is divided into two main domains based on the planet type:
 
-### Data Preparation
-- **`02_spec_data.ipynb`**: Notebook for generating the transmission spectra dataset used for training and testing.
-- **`02_stellar_contamination_epsilon.ipynb`**: Computes the contamination factors ($\epsilon$) arising from stellar heterogeneity (spots and faculae).
+### 1. Earth-like Atmospheres (`Earth_like_Atmosphere/`)
+Focused on terrestrial planets with potential biosignatures.
 
-### Modeling (Deep Learning)
-- **`Models/`**: Directory containing:
-  - `03_AE.ipynb`: The training pipeline for the AutoEncoder architecture.
-  - Saved Keras models (`AE.keras`, `AE_l2.keras`).
+- **Data Preparation**:
+  - `02_spec_data.ipynb`: Generates transmission spectra dataset.
+  - `02_stellar_contamination_epsilon.ipynb`: Computes contamination factors ($\epsilon$).
+- **Modeling**:
+  - `Models/`: Contains AutoEncoder models (`AE.keras`) and training notebooks.
+- **Validation**:
+  - `Retreival Tests/`: POSEIDON retrieval results (MultiNest) and corner plots.
 
-### Uncertainty & Simulation
-- **`AE pandexo_incertidumbres_final.ipynb`**: Analysis incorporating Pandexo simulations to account for observational uncertainties and instrument noise (e.g., JWST NIRSpec/MIRI).
+### 2. Sub-Neptune Atmospheres (`Sub_Neptune_Atmosphere/`)
+Focused on gas-rich sub-Neptunes like K2-18b.
 
-### Validation
-- **`Retreival Tests/`**: Contains outputs from atmospheric retrieval experiments, including nested sampling results (MultiNest) and corner plots comparing retrieved parameters against ground truths.
+- **Spectra & Data**:
+  - `specs/`: Contains spectral datasets (`K2-18b_data.joblib`, parquet files) and generation notebooks (`Spectra_Generatio.ipynb`).
+  - `stellar_contamination.ipynb`: Stellar contamination analysis for this case.
+- **Modeling**:
+  - `AE.keras`, `AE_l2.ipynb`: AutoEncoder models and training scripts.
+- **Analysis**:
+  - `RetrievalAnal/`: Comprehensive retrieval analysis including `Retrieval_analysis.ipynb` and `POSEIDON_output/`.
+  - `AE pandexo_incertidumbres.ipynb`: Uncertainty analysis with Pandexo.
+
+### Shared Resources
+- **`AE pandexo_incertidumbres_final.ipynb`** (in Earth-like folder): General uncertainty analysis framework.
 
 ## Requirements
 
 To replicate the experiments, the following Python packages are required:
 
 - `tensorflow` / `keras` (for AutoEncoders)
-- `pandexo` (for instrument simulation)
+- `multirex` (for spectra generation)
 - `poseidon` (for atmospheric retrieval)
+- `pandexo` (for instrument simulation)
 - `scikit-learn`
 - `plotly`
 - `numpy`, `pandas`, `matplotlib`
