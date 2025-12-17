@@ -1,62 +1,57 @@
-# MultiREx: Machine-Assisted Biosignature Classification in Exoplanet Atmospheres
+# G-DAESpec
 
-## Abstract
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Powered by MultiREx](https://img.shields.io/badge/Powered%20by-MultiREx-blueviolet)](https://github.com/Multiverse-Spectroscopy/MultiREx)
+[![Powered by POSEIDON](https://img.shields.io/badge/Powered%20by-POSEIDON-007ec6)](https://github.com/MartianColonist/POSEIDON)
 
-This repository hosts the computational framework and datasets associated with the research on classifying potential biosignatures and atmospheric compositions in exoplanets. The study leverages deep learning techniques, specifically AutoEncoders (AE), to analyze low signal-to-noise ratio (SNR) transmission spectra of both Earth-like and Sub-Neptune planets. By reducing the dimensionality of spectral data, we aim to efficiently identify atmospheric components (e.g., $H_2O$, $CH_4$, $O_3$) amidst stellar contamination and instrumental noise.
+## Overview
 
-## Description
+**G-DAESpec** implements a **G-DAE** (General Denoising AutoEncoder) designed to correct the effects of stellar contamination in exoplanet transmission spectra.
 
-The project focuses on:
-1.  **Spectra Generation**: Simulating transmission spectra for Earth-like (e.g., TRAPPIST-1e) and Sub-Neptune (e.g., K2-18b) atmospheres.
-2.  **Stellar Contamination**: Modeling the impact of stellar spots and faculae on the observed spectra.
-3.  **Dimensionality Reduction**: Training AutoEncoders to compress spectral data while retaining essential features for classification.
-4.  **Retrieval Analysis**: Validating the machine learning approach against traditional atmospheric retrieval methods (using POSEIDON).
+This work validates the G-DAE architecture using two distinct planetary cases:
+1.  **Rocky Planets**: Using a **TRAPPIST-1e** analogue.
+2.  **Sub-Neptunes**: Using **K2-18b** analogues.
+
+The project leverages the **MultiREx** library for spectral handling and **POSEIDON** for atmospheric retrieval and validation.
+
+## Features
+
+- **Stellar Contamination Correction**: Removes noise introduced by stellar spots and faculae to recover the true planetary spectrum.
+- **Deep Learning Architecture**: Utilizes a Denoising AutoEncoder (DAE) trained on simulated datasets.
+- **Broad Applicability**: Tested on both terrestrial and sub-Neptune atmospheric regimes.
+- **Validation**: Results are verified against standard Bayesian atmospheric retrieval methods (Nested Sampling via POSEIDON).
 
 ## Repository Structure
 
-The project is divided into two main domains based on the planet type:
+The repository is organized by planetary case studies:
 
 ### 1. Earth-like Atmospheres (`Earth_like_Atmosphere/`)
-Focused on terrestrial planets with potential biosignatures.
-
-- **Data Preparation**:
-  - `02_spec_data.ipynb`: Generates transmission spectra dataset.
-  - `02_stellar_contamination_epsilon.ipynb`: Computes contamination factors ($\epsilon$).
-- **Modeling**:
-  - `Models/`: Contains AutoEncoder models (`AE.keras`) and training notebooks.
-- **Validation**:
-  - `Retreival Tests/`: POSEIDON retrieval results (MultiNest) and corner plots.
+Focuses on the TRAPPIST-1e analogue.
+- **Data Generation**: `02_spec_data.ipynb` (Spectra), `02_stellar_contamination_epsilon.ipynb` (Contamination factors).
+- **Models**: `Models/` directory containing the trained AutoEncoder (`AE.keras`) and training notebooks (`03_AE.ipynb`).
+- **Validation**: `Retreival Tests/` containing POSEIDON retrieval outputs and comparison plots.
+- **Uncertainties**: `AE pandexo_incertidumbres_final.ipynb` for instrument noise simulation (JWST).
 
 ### 2. Sub-Neptune Atmospheres (`Sub_Neptune_Atmosphere/`)
-Focused on gas-rich sub-Neptunes like K2-18b.
-
-- **Spectra & Data**:
-  - `specs/`: Contains spectral datasets (`K2-18b_data.joblib`, parquet files) and generation notebooks (`Spectra_Generatio.ipynb`).
-  - `stellar_contamination.ipynb`: Stellar contamination analysis for this case.
-- **Modeling**:
-  - `AE.keras`, `AE_l2.ipynb`: AutoEncoder models and training scripts.
-- **Analysis**:
-  - `RetrievalAnal/`: Comprehensive retrieval analysis including `Retrieval_analysis.ipynb` and `POSEIDON_output/`.
-  - `AE pandexo_incertidumbres.ipynb`: Uncertainty analysis with Pandexo.
-
-### Shared Resources
-- **`AE pandexo_incertidumbres_final.ipynb`** (in Earth-like folder): General uncertainty analysis framework.
+Focuses on the K2-18b analogue.
+- **Data**: `specs/` folder with generated spectra (`.joblib`, `.parquet`).
+- **Models**: `AE.keras` and training scripts (`AE_l2.ipynb`).
+- **Analysis**: `RetrievalAnal/` for detailed retrieval performance assessment.
 
 ## Requirements
 
-To replicate the experiments, the following Python packages are required:
+The following key libraries are used in this project:
 
-- `tensorflow` / `keras` (for AutoEncoders)
-- `multirex` (for spectra generation)
-- `poseidon` (for atmospheric retrieval)
-- `pandexo` (for instrument simulation)
-- `scikit-learn`
-- `plotly`
-- `numpy`, `pandas`, `matplotlib`
+- **[MultiREx](https://github.com/Multiverse-Spectroscopy/MultiREx)**: For handling exoplanet spectra.
+- **[POSEIDON](https://github.com/MartianColonist/POSEIDON)**: For atmospheric retrieval and spectra generation.
+- **TensorFlow / Keras**: For building and training the G-DAE models.
+- **Pandeia / PandExo**: For JWST instrument noise simulation.
+- **Scikit-learn, NumPy, Pandas, Matplotlib**: For data processing and visualization.
 
 ## Citation
 
-If you use this code or data in your research, please refer to the associated publication (insert link/DOI here).
+If you use this code in your research, please cite the associated paper (link/DOI to be added).
 
 ## License
 
