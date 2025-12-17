@@ -2,8 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Powered by MultiREx](https://img.shields.io/badge/Powered%20by-MultiREx-blueviolet)](https://github.com/Multiverse-Spectroscopy/MultiREx)
+[![Powered by MultiREx](https://img.shields.io/badge/Powered%20by-MultiREx-blueviolet)](https://github.com/D4san/MultiREx-public)
 [![Powered by POSEIDON](https://img.shields.io/badge/Powered%20by-POSEIDON-007ec6)](https://github.com/MartianColonist/POSEIDON)
+[![Powered by TauREx 3](https://img.shields.io/badge/Powered%20by-TauREx%203-red)](https://github.com/ucl-exoplanets/TauREx3_public)
 
 ## Overview
 
@@ -43,11 +44,20 @@ Focuses on the K2-18b analogue.
 
 The following key libraries are used in this project:
 
-- **[MultiREx](https://github.com/Multiverse-Spectroscopy/MultiREx)**: For handling exoplanet spectra.
+- **[MultiREx](https://github.com/D4san/MultiREx-public)**: For handling exoplanet spectra.
 - **[POSEIDON](https://github.com/MartianColonist/POSEIDON)**: For atmospheric retrieval and spectra generation.
+- **[TauREx 3](https://github.com/ucl-exoplanets/TauREx3_public)**: Bayesian retrieval framework.
 - **TensorFlow / Keras**: For building and training the G-DAE models.
 - **Pandeia / PandExo**: For JWST instrument noise simulation.
 - **Scikit-learn, NumPy, Pandas, Matplotlib**: For data processing and visualization.
+
+### Opacity Data & Chemical Species
+
+This project utilizes opacity data and chemical species line lists from the following sources:
+- **[ExoMol](https://www.exomol.com/)**: Molecular line lists for exoplanet and other hot atmospheres.
+- **[ExoTransmit](https://github.com/elizakempton/Exo_Transmit)**: Transmission spectra calculation.
+
+Please ensure to cite these works appropriately when using the data.
 
 ## Citation
 
