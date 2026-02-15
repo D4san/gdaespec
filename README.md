@@ -41,30 +41,11 @@ The project leverages the **MultiREx** library for spectral handling and **POSEI
 
 ## Repository Structure
 
-```
-gdaespec/
-├── Earth_like_Atmosphere/          # Case 1: TRAPPIST-1e analogue
-│   ├── 01_G-DAE.ipynb              # G-DAE training
-│   ├── 02_G-DAE_Analysis.ipynb     # Performance analysis
-│   ├── Models/                     # Trained G-DAE model (.keras)
-│   ├── Retrieval Tests/            # POSEIDON retrieval experiments
-│   ├── spec_data/                  # Spectral datasets
-│   ├── stellar_contamination/      # Contamination factor files
-│   └── ...
-│
-├── Sub_Neptune_Atmosphere/         # Case 2: K2-18b analogue
-│   ├── 01_Spectra_Generation.ipynb # Synthetic spectral library
-│   ├── 02_Stellar_Contamination.ipynb  # ε(λ) computation
-│   ├── 03_AE_Training.ipynb        # G-DAE training
-│   ├── 04_G-DAE_Evaluation.ipynb   # Model evaluation
-│   ├── AE.keras                    # Trained model
-│   ├── TLS/                        # Transit Light Source effect files
-│   └── specs/                      # Generated spectra
-│
-├── Figures/                        # Figures and plots for the paper
-├── LICENSE
-└── README.md
-```
+This repository is structured around the two primary applications of the G-DAE architecture presented in the paper.
+
+In the **Earth_like_Atmosphere** folder, you will find the work related to the **TRAPPIST-1e** analogue. This includes the notebooks for training the G-DAE and analyzing its performance, as well as a specific subdirectory for `Retrieval Tests` using POSEIDON. This folder also houses the necessary spectral data and the stellar contamination models used in this case study.
+
+By contrast, the **Sub_Neptune_Atmosphere** folder contains the **K2-18b** analogue experiments. Here, the workflow is broken down into sequential steps: generating the spectral library, calculating stellar contamination, training the AutoEncoder, and finally evaluating the G-DAE. The trained model and generated spectra are also stored here.
 
 Each case study directory contains its own `README.md` with detailed instructions.
 
