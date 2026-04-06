@@ -16,21 +16,21 @@ from pathlib import Path
 import numpy as np
 from mpi4py import MPI
 
-# Environment settings for MPI safety
-os.environ.setdefault("MPLBACKEND", "Agg")  # Non-interactive backend
+# Keep plotting and linear algebra backends MPI-friendly
+os.environ.setdefault("MPLBACKEND", "Agg")  # Non-interactive backend for batch runs
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 
-# Suppress pysynphot warnings
+# Silence noisy pysynphot warnings during batch execution
 warnings.filterwarnings("ignore", category=UserWarning, module=r"pysynphot")
 
-# Global communicator and rank
+# MPI state used for rank-aware logging and root-only post-processing
 comm = MPI.COMM_WORLD
 _rank = comm.Get_rank()
 
-# --- Monkey-patch: shared_memory_array force float64 ---
+# Override POSEIDON shared-memory allocation to use float64 buffers
 import POSEIDON.utility as _U
 
 
@@ -42,22 +42,22 @@ def _shared_memory_array_force64(node_rank, node_comm, shape):
     dtype = np.float64
     itemsize = np.dtype(dtype).itemsize
 
-    # Rank 0 of the node reserves the memory
+    # Only the first rank on each node reserves the shared buffer
     nbytes = int(np.prod(shape)) * itemsize if node_rank == 0 else 0
 
-    # Allocate shared memory window
+    # Expose the buffer through an MPI shared-memory window
     win = MPI.Win.Allocate_shared(nbytes, itemsize, comm=node_comm)
 
-    # Query the segment created by the first rank
+    # All ranks attach to the segment created by the first rank
     buf, _ = win.Shared_query(MPI.PROC_NULL)
 
-    # Build the ndarray over the shared buffer
+    # Wrap the raw buffer as a NumPy array
     arr = np.ndarray(buffer=buf, dtype=dtype, shape=shape)
 
     return arr, win
 
 
-# Apply the patch
+# Install the allocator override before importing retrieval helpers
 _U.shared_memory_array = _shared_memory_array_force64
 
 # POSEIDON imports
@@ -78,11 +78,11 @@ from POSEIDON.corner import generate_cornerplot
 
 
 def main():
-    """Main execution function for retrieval."""
+    """Run the G-DAE-based chemistry retrieval and generate summary figures."""
     t_start = time.time()
 
-    # --- Star and Planet Definition ---
-    # Stellar properties (Trappist-1)
+    # --- System Definition ---
+    # TRAPPIST-1 stellar properties
     r_star = 0.1192 * R_Sun
     t_star = 2566.0
     metallicity_star = 0.00
@@ -93,7 +93,7 @@ def main():
         stellar_grid="phoenix",
     )
 
-    # Planetary properties (Trappist-1e)
+    # TRAPPIST-1e planetary properties
     planet_name = "Trappist-1e"
     r_planet = 0.917985 * R_E
     m_planet = 0.6356 * M_E
@@ -101,12 +101,12 @@ def main():
 
     planet = create_planet(planet_name, r_planet, mass=m_planet, T_eq=t_eq_planet)
 
-    # --- Data and Instruments ---
-    # Wavelength grid
+    # --- Data and Instrument Setup ---
+    # High-resolution wavelength grid used internally by POSEIDON
     wl_min, wl_max, res = 0.4, 6.0, 4000
     wl = wl_grid_constant_R(wl_min, wl_max, res)
 
-    # Load observations (using decontaminated 'recon' spectra)
+    # Retrieval input: G-DAE reconstructed spectrum for this contamination case
     data_dir = Path("observations")
     obs_file = "pandexo_output_100transits_fspot0.26_ffac0.70_recon.dat"
     datasets = [obs_file]
@@ -114,8 +114,8 @@ def main():
 
     data = load_data(str(data_dir), datasets, instruments, wl)
 
-    # --- Model Definition ---
-    # Model configuration for G-DAE strategy (Chem-only retrieval on cleaned data)
+    # --- Atmospheric Model ---
+    # Chemistry-only model applied to the reconstructed transmission spectrum
     model_name = "recon_100T_0.26spot-0.70fac"
     bulk_species = ["N2"]
     param_species = ["H2O", "CH4", "CO2", "O3"]
@@ -131,7 +131,7 @@ def main():
     if _rank == 0:
         print(f"Free parameters: {model['param_names']}", flush=True)
 
-    # --- Priors Setting ---
+    # --- Priors ---
     prior_types = {
         "T": "uniform",
         "R_p_ref": "uniform",
@@ -152,21 +152,21 @@ def main():
 
     priors = set_priors(planet, star, model, data, prior_types, prior_ranges)
 
-    # --- Opacity Reading ---
+    # --- Opacity Interpolation Grid ---
     opacity_treatment = "opacity_sampling"
 
-    # Define grids for interpolation
-    t_fine = np.arange(250.0, 450.0 + 10.0, 10.0)
-    log_p_fine = np.arange(-3.0, 20.0 + 0.2, 0.2)
+    # Use the same opacity grid adopted by the standard chemistry-only run
+    t_fine = np.arange(200.0, 400.0 + 10.0, 10.0)
+    log_p_fine = np.arange(-2.0, 2.0 + 0.2, 0.2)
 
     opac = read_opacities(model, wl, opacity_treatment, t_fine, log_p_fine)
 
-    # --- Atmosphere Configuration ---
-    p_min, p_max, n_layers = 1.0e-3, 20, 100
+    # --- Vertical Pressure Grid ---
+    p_min, p_max, n_layers = 1.0e-2, 2.0, 100
     p_grid = np.logspace(np.log10(p_max), np.log10(p_min), n_layers)
-    p_ref = 10.0  # reference pressure in bar
+    p_ref = 1.0  # reference pressure in bar
 
-    # --- Run Retrieval ---
+    # --- Retrieval ---
     if _rank == 0:
         print(">> Initializing retrieval with MultiNest...", flush=True)
     
@@ -185,16 +185,16 @@ def main():
     if _rank == 0:
         print(f">> Retrieval completed. Elapsed time: {dt_ret/60:.2f} min", flush=True)
 
-    # Wait for all processes
+    # Synchronize ranks before starting root-only plotting
     comm.Barrier()
 
     # --- Post-processing ---
     if _rank == 0:
-        # Load retrieved spectrum results
+        # Load the stored posterior spectrum envelopes
         wl_ret, s_low2, s_low1, s_med, s_high1, s_high2 = \
             read_retrieved_spectrum(planet_name, model_name)
 
-        # Create collections for plotting
+        # Convert posterior envelopes into plotting collections
         spectra_med = plot_collection(s_med, wl_ret, collection=[])
         spectra_low1 = plot_collection(s_low1, wl_ret, collection=[])
         spectra_low2 = plot_collection(s_low2, wl_ret, collection=[])
@@ -204,7 +204,7 @@ def main():
         out_dir = Path("figures")
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # Plot retrieved spectrum
+        # Save the retrieved-spectrum summary figure
         fig_spec = plot_spectra_retrieved(
             spectra_med, spectra_low2, spectra_low1, spectra_high1, spectra_high2,
             planet_name, data, R_to_bin=100,
@@ -216,7 +216,7 @@ def main():
             dpi=180, bbox_inches="tight"
         )
 
-        # Generate corner plot
+        # Save the posterior corner plot when POSEIDON returns a figure handle
         corner_out = generate_cornerplot(planet, model)
         fig_corner = None
         if hasattr(corner_out, "savefig"):
