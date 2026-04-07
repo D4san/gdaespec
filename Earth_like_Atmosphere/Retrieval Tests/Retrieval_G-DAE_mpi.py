@@ -30,6 +30,65 @@ warnings.filterwarnings("ignore", category=UserWarning, module=r"pysynphot")
 comm = MPI.COMM_WORLD
 _rank = comm.Get_rank()
 
+BASE_DIR = Path(__file__).resolve().parent
+
+MODE_LABEL = "recon"
+
+
+def _get_env_setting(name: str, cast, default):
+    """Read one optional environment setting and cast it to the target type."""
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+
+    try:
+        return cast(raw_value)
+    except ValueError as exc:
+        raise ValueError(
+            f"Invalid value for {name!r}: {raw_value!r}"
+        ) from exc
+
+
+N_TRANSITS = _get_env_setting("RETRIEVAL_N_TRANSITS", int, 10)
+F_SPOT_CASE = _get_env_setting("RETRIEVAL_F_SPOT_CASE", float, 0.26)
+F_FAC_CASE = _get_env_setting("RETRIEVAL_F_FAC_CASE", float, 0.70)
+
+
+def build_observation_filename(
+    n_transits: int,
+    f_spot_case: float,
+    f_fac_case: float,
+    reconstructed: bool = False,
+) -> str:
+    """Build the observation filename for one stellar-heterogeneity case."""
+    stem = (
+        f"pandexo_output_{n_transits}transits_"
+        f"fspot{f_spot_case:.2f}_ffac{f_fac_case:.2f}"
+    )
+    if reconstructed:
+        stem += "_recon"
+    return f"{stem}.dat"
+
+
+def build_model_name(
+    mode_label: str,
+    n_transits: int,
+    f_spot_case: float,
+    f_fac_case: float,
+) -> str:
+    """Build a POSEIDON model name consistent with the selected case."""
+    return (
+        f"{mode_label}_{n_transits}T_"
+        f"{f_spot_case:.2f}spot-{f_fac_case:.2f}fac"
+    )
+
+
+def ensure_dataset_exists(data_dir: Path, obs_file: str) -> None:
+    """Raise a clear error when the requested observation file is missing."""
+    obs_path = data_dir / obs_file
+    if not obs_path.is_file():
+        raise FileNotFoundError(f"Observation not found: {obs_path}")
+
 # Override POSEIDON shared-memory allocation to use float64 buffers
 import POSEIDON.utility as _U
 
@@ -80,6 +139,16 @@ from POSEIDON.corner import generate_cornerplot
 def main():
     """Run the G-DAE-based chemistry retrieval and generate summary figures."""
     t_start = time.time()
+    os.chdir(BASE_DIR)
+
+    if _rank == 0:
+        print(
+            ">> Retrieval case: "
+            f"N_TRANSITS={N_TRANSITS}, "
+            f"F_SPOT_CASE={F_SPOT_CASE:.2f}, "
+            f"F_FAC_CASE={F_FAC_CASE:.2f}",
+            flush=True,
+        )
 
     # --- System Definition ---
     # TRAPPIST-1 stellar properties
@@ -107,8 +176,14 @@ def main():
     wl = wl_grid_constant_R(wl_min, wl_max, res)
 
     # Retrieval input: G-DAE reconstructed spectrum for this contamination case
-    data_dir = Path("observations")
-    obs_file = "pandexo_output_100transits_fspot0.26_ffac0.70_recon.dat"
+    data_dir = BASE_DIR / "observations"
+    obs_file = build_observation_filename(
+        N_TRANSITS,
+        F_SPOT_CASE,
+        F_FAC_CASE,
+        reconstructed=True,
+    )
+    ensure_dataset_exists(data_dir, obs_file)
     datasets = [obs_file]
     instruments = ["JWST_NIRSpec_PRISM"]
 
@@ -116,7 +191,7 @@ def main():
 
     # --- Atmospheric Model ---
     # Chemistry-only model applied to the reconstructed transmission spectrum
-    model_name = "recon_100T_0.26spot-0.70fac"
+    model_name = build_model_name(MODE_LABEL, N_TRANSITS, F_SPOT_CASE, F_FAC_CASE)
     bulk_species = ["N2"]
     param_species = ["H2O", "CH4", "CO2", "O3"]
 
