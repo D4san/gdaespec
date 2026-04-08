@@ -66,6 +66,20 @@ Completed SPHINX runs append their total wall-clock time to:
 The format mirrors the baseline `Retrieval Tests/Times` file, but it is stored
 inside `sphinx_injection/` so the mismatch experiment stays self-contained.
 
+## Metrics Log
+
+All three SPHINX analysis notebooks append their summary metrics to the same CSV:
+
+- [chi2_log_sphinx.csv](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/chi2_log_sphinx.csv)
+
+The shared table includes a `retrieval_strategy` column so the rows from:
+
+- `no_contam`
+- `contam`
+- `gdae`
+
+remain distinguishable after being merged into a single log file.
+
 ## Running
 
 Example:

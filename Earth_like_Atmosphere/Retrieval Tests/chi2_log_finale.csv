@@ -1,0 +1,2 @@
+planet_name,model_name,observation,N,p,dof,MSE,chi2,chi2_reduced
+Trappist-1e,uncontam_10T_0.26spot-0.70fac,pandexo_output_10transits_fspot0.26_ffac0.70.dat,385,11,374,5.493737952e-09,1618.747953,4.328203083

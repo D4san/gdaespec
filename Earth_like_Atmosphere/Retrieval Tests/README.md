@@ -40,6 +40,39 @@ The standard comparison uses three strategies:
    - `Retrieval_G-DAE_mpi.py`
 3. Inspect the output with the corresponding retrieval analysis notebook.
 
+### Posterior-propagated diagnostics
+
+If you want to evaluate `MSE` and reduced `chi^2` using posterior sampled
+spectra instead of only the retrieved median spectrum, run:
+
+```bash
+python "Earth_like_Atmosphere/Retrieval Tests/posterior_diagnostics.py" --mode uncontam --branch phoenix
+```
+
+This helper will:
+
+1. locate the raw MultiNest posterior for the requested retrieval case
+2. regenerate a configurable number of spectra with `retrieved_samples(...)`
+3. save those propagated spectra to `posterior_diagnostics/<model>_posterior_samples.npz`
+4. update `chi2_log_posterior.csv` with:
+   - the legacy median-spectrum metrics (`MSE`, `chi2`, `chi2_reduced`)
+   - new `posterior_*` summary columns for the propagated metric distribution
+
+Useful flags:
+
+- `--mode {uncontam,contam,recon}`
+- `--branch {phoenix,sphinx}`
+- `--n-transits`
+- `--f-spot`
+- `--f-fac`
+- `--posterior-samples`
+
+The same script is importable from notebooks via:
+
+```python
+from posterior_diagnostics import build_case_config, run_case
+```
+
 Typical MPI usage:
 
 ```bash
@@ -95,6 +128,12 @@ Each script:
 - keeps the stellar model in PHOENIX
 - writes outputs relative to `sphinx_injection/` so the SPHINX branch stays separated from the baseline retrieval outputs
 - appends the total wall-clock time of each completed run to `sphinx_injection/Times`
+
+The posterior diagnostics helper also works on this branch:
+
+```bash
+python "Earth_like_Atmosphere/Retrieval Tests/posterior_diagnostics.py" --mode recon --branch sphinx
+```
 
 ### Step 3: Analyze the SPHINX retrievals
 
