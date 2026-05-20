@@ -1,8 +1,22 @@
-# Data Source
+# Earth-like Spectral Data
 
-The datasets contained in this directory were sourced from the following study:
+This directory contains the compact spectral datasets used to train and test
+the Earth-like G-DAE model. The files are grouped by atmospheric composition
+and use the same source convention as the referenced MultiREx example.
 
-**Duque-Castaño et al. (2025)**
+The datasets were sourced from **Duque-Castaño et al. (2025)**.
+
+## Files
+
+- `airless_data.csv`
+- `CO2_data.csv`
+- `H2O_data.csv`
+- `O3_data.csv`
+- `CH4_data.csv`
+- `CH4_H2O_data.csv`
+- `CH4_O3_data.csv`
+- `O3_H2O_data.csv`
+- `CH4_O3_H2O_data.csv`
 
 ## References
 

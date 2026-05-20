@@ -1,42 +1,37 @@
 # Stellar Contamination Assets
 
-This directory stores the stellar contamination curves used in the Earth-like TRAPPIST-1 workflow.
+This directory stores the stellar-contamination curves used in the Earth-like
+TRAPPIST-1 workflow.
 
 ## Contents
 
 - `TRAPPIST-1_contam_fspot*_ffac*.txt`
-  Original contamination curves used in the PHOENIX-based workflow.
+  PHOENIX-based contamination curves.
 - `sphinx_TRAPPIST-1_contam_fspot*_ffac*.txt`
-  Alternative contamination curves generated with SPHINX stellar spectra for the same spot and facula coverage fractions.
+  SPHINX-based contamination curves for the same spot and facula coverage
+  fractions.
 - `generate_sphinx_trappist1_contamination.ipynb`
   Notebook used to generate the SPHINX curves.
-- `bitacora_generacion_sphinx_trappist1.md`
-  Step-by-step generation log for the SPHINX contamination files.
 - `sphinx_data/`
-  Local SPHINX stellar grids used as input to generate the SPHINX `epsilon(lambda)` curves.
+  Local SPHINX stellar grids used as input to generate `epsilon(lambda)`.
 
 ## Role in the Workflow
 
-This folder feeds two different stages:
+The retrieval campaign reads this folder through
+[`../Retrieval Tests/campaign_observations.py`](../Retrieval%20Tests/campaign_observations.py).
 
-1. `01_G-DAE.ipynb`
-   The training dataset can include both the original PHOENIX contamination curves and the SPHINX ones.
-2. `02_G-DAE_Analysis.ipynb`
-   The final export section reads these files to generate retrieval-ready observations for:
-   - the standard PHOENIX contamination branch
-   - the SPHINX injection branch
+The campaign uses:
 
-## SPHINX Branch
+- PHOENIX curves for the `phoenix` branch.
+- SPHINX curves for the `sphinx` injection branch.
 
-The SPHINX contamination files are meant to support the following experiment:
+Both branches write their generated observations under
+[`../Retrieval Tests/campaign_5obs`](../Retrieval%20Tests/campaign_5obs/).
 
-- inject synthetic observations using SPHINX `epsilon(lambda)`
-- run atmospheric retrievals with PHOENIX stellar models
-- compare the behavior of the retrieval under model mismatch
-
-The retrieval-ready observation files produced from these curves are written outside this folder, in:
-
-- [Retrieval Tests/observations_sphinx](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/observations_sphinx)
+The SPHINX curves were generated with
+`generate_sphinx_trappist1_contamination.ipynb` from the local grids in
+`sphinx_data/`, using the same spot and facula filling factors as the PHOENIX
+curves.
 
 ## References
 

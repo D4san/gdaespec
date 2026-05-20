@@ -1,168 +1,101 @@
 # Retrieval Tests
 
-This directory contains the POSEIDON retrieval workflows used to test how stellar contamination affects the recovery of atmospheric parameters.
+This directory contains the POSEIDON retrieval workflow used to compare two
+ways of handling stellar contamination in synthetic TRAPPIST-1e transmission
+observations.
 
-## Retrieval Strategies
+The active workflow is the five-observation campaign in `campaign_5obs/`.
 
-The standard comparison uses three strategies:
+## Scientific Comparison
 
-1. `No-contam`
-   Retrieval of the contaminated spectrum with no stellar contamination model.
-2. `Contam`
-   Retrieval of the contaminated spectrum while explicitly fitting stellar contamination.
-3. `G-DAE`
-   Retrieval of the G-DAE reconstructed spectrum with a chemistry-only atmospheric model.
+Each campaign test uses a synthetic 10-transit observation generated from the
+same clean atmospheric spectrum and one contamination case.
 
-## Dependencies
+The noisy spectra are generated with PandExo in `campaign_observations.py`.
+That script starts from `pandexo_spec.txt`, applies the selected
+`epsilon(lambda)` contamination curve from `../stellar_contamination/`, and
+writes the noisy observation files under `campaign_5obs/test_XX/<branch>/observations/`.
+It also writes the matching G-DAE reconstructions as `*_recon.dat`.
 
-- `POSEIDON`
-- `MPI` such as MPICH or OpenMPI
+The two retrieval strategies are:
 
-## Directory Layout
+1. `gdae`
+   The observed spectrum is preprocessed with the trained G-DAE. POSEIDON then
+   retrieves the atmospheric parameters from the reconstructed `*_recon.dat`
+   spectrum.
+2. `contam`
+   POSEIDON retrieves atmospheric parameters and stellar-contamination
+   parameters jointly from the raw contaminated observation.
 
-- `observations/`
-  Retrieval-ready PHOENIX-based observations and their reconstructed `*_recon.dat` companions.
-- `observations_sphinx/`
-  Retrieval-ready observations injected with SPHINX `epsilon(lambda)`.
-- `sphinx_injection/`
-  MPI retrieval scripts and companion analysis notebooks for the SPHINX injection experiment.
-- `Retrieval_*_mpi.py`
-  The original retrieval scripts for the baseline PHOENIX workflow.
-- `Retrieval_analysis*.ipynb`
-  Notebooks used to inspect retrieval outputs and compare strategies.
+The campaign includes two contamination branches:
 
-## Baseline PHOENIX Workflow
+- `phoenix`: contamination curves from the PHOENIX-based stellar model grid.
+- `sphinx`: observations injected with SPHINX contamination curves while the
+  retrieval still uses the PHOENIX stellar model prescription.
 
-1. Generate or update the PHOENIX-based observation files in `observations/`.
-2. Run one of the scripts:
-   - `Retrieval_no-contam_mpi.py`
-   - `Retrieval_contam_mpi.py`
-   - `Retrieval_G-DAE_mpi.py`
-3. Inspect the output with the corresponding retrieval analysis notebook.
+## Files
 
-### Posterior-propagated diagnostics
+| Path | Purpose |
+| --- | --- |
+| `campaign_common.py` | Shared campaign configuration, paths, case definitions, and CSV helpers. |
+| `campaign_setup.py` | Creates the campaign directory tree and empty CSV headers. |
+| `campaign_observations.py` | Generates PandExo observations and G-DAE reconstructions. |
+| `campaign_retrieval_mpi.py` | Runs one POSEIDON retrieval case with MPI. |
+| `campaign_metrics.py` | Computes MSE and reduced chi-square for completed retrievals. |
+| `campaign_plot_aggregates.py` | Plots aggregate timing and metric summaries from campaign CSV files. |
+| `campaign_plot_parameters.py` | Plots retrieved atmospheric parameters from POSEIDON result files. |
+| `campaign_plot_observations.py` | Plots raw observations and G-DAE reconstructions across tests. |
+| `campaign_run_gdae_queue.py` | Runs the missing `gdae` campaign jobs. |
+| `campaign_run_contam_queue.py` | Runs the missing `contam` campaign jobs. |
+| `run_gdae_queue.sh`, `run_contam_queue.sh` | Local WSL queue helpers. Edit paths before using elsewhere. |
+| `pandexo_spec.txt` | Clean spectrum used as the PandExo input baseline. |
+| `campaign_5obs/` | Campaign CSV summaries and generated per-test products. |
 
-If you want to evaluate `MSE` and reduced `chi^2` using posterior sampled
-spectra instead of only the retrieved median spectrum, run:
+## Campaign Layout
 
-```bash
-python "Earth_like_Atmosphere/Retrieval Tests/posterior_diagnostics.py" --mode uncontam --branch phoenix
-```
+`campaign_5obs/` contains:
 
-This helper will:
+- `metrics.csv`: aggregate metric table with
+  `id,branch,f_spot,f_fac,strategy,MSE,chi2_reduced`.
+- `times.csv`: aggregate run-time table with
+  `id,branch,f_spot,f_fac,strategy,delta_time`.
+- `test_01/` to `test_05/`: generated observations, retrieval outputs, and
+  figures for each synthetic observation.
+- `plots/`: aggregate figures generated from the campaign outputs.
 
-1. locate the raw MultiNest posterior for the requested retrieval case
-2. regenerate a configurable number of spectra with `retrieved_samples(...)`
-3. save those propagated spectra to `posterior_diagnostics/<model>_posterior_samples.npz`
-4. update `chi2_log_posterior.csv` with:
-   - the legacy median-spectrum metrics (`MSE`, `chi2`, `chi2_reduced`)
-   - new `posterior_*` summary columns for the propagated metric distribution
+Large generated products inside each test folder are ignored by Git. The CSV
+summaries are the compact campaign record.
 
-Useful flags:
+## Inputs
 
-- `--mode {uncontam,contam,recon}`
-- `--branch {phoenix,sphinx}`
-- `--n-transits`
-- `--f-spot`
-- `--f-fac`
-- `--posterior-samples`
+The campaign expects these project files:
 
-The same script is importable from notebooks via:
+- `pandexo_spec.txt`
+- `../Models/G-DAE.keras`
+- `../stellar_contamination/`
 
-```python
-from posterior_diagnostics import build_case_config, run_case
-```
+The retrieval step also requires a working POSEIDON, PandExo/Pandeia, and MPI
+environment with the corresponding opacity and stellar-model data available
+locally.
 
-Typical MPI usage:
+## Typical Workflow
 
-```bash
-mpirun -n <cores> python -u Retrieval_no-contam_mpi.py
-```
-
-The three baseline MPI scripts now share the same case parameters:
-
-- `RETRIEVAL_N_TRANSITS`
-- `RETRIEVAL_F_SPOT_CASE`
-- `RETRIEVAL_F_FAC_CASE`
-
-If those environment variables are not defined, the scripts fall back to their
-module defaults.
-
-## SPHINX Injection Workflow
-
-This branch is designed for the mismatch experiment:
-
-- the synthetic observation is generated with SPHINX `epsilon(lambda)`
-- the retrieval still uses PHOENIX stellar models
-
-### Step 1: Generate SPHINX observations
-
-Open [02_G-DAE_Analysis.ipynb](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/02_G-DAE_Analysis.ipynb) and run the final section:
-
-- `Retrieval Observations for PHOENIX and SPHINX Injection`
-
-That section will:
-
-1. read the contamination curves from [stellar_contamination](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/stellar_contamination)
-2. build PandExo input spectra for the selected cases
-3. write the SPHINX-injected observations to `observations_sphinx/`
-4. generate the matching `*_recon.dat` files for the G-DAE strategy
-
-### Step 2: Run the SPHINX retrievals
-
-Use the scripts in [sphinx_injection](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection):
-
-- [Retrieval_no-contam_mpi.py](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_no-contam_mpi.py)
-- [Retrieval_contam_mpi.py](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_contam_mpi.py)
-- [Retrieval_G-DAE_mpi.py](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_G-DAE_mpi.py)
-
-Run them from a cluster or MPI-enabled environment, for example:
+Run commands from this directory.
 
 ```bash
-mpirun -n <cores> python -u "Earth_like_Atmosphere/Retrieval Tests/sphinx_injection/Retrieval_no-contam_mpi.py"
+python campaign_setup.py
+python campaign_observations.py --test-id test_02 --branch all
+mpirun -n 12 python -u campaign_retrieval_mpi.py --test-id test_02 --branch phoenix --strategy gdae --f-spot 0.26 --f-fac 0.70
+python campaign_metrics.py --test-id test_02 --branch phoenix --strategy gdae --f-spot 0.26 --f-fac 0.70
+python campaign_plot_aggregates.py
 ```
 
-Each script:
-
-- reads its input from `observations_sphinx/`
-- keeps the stellar model in PHOENIX
-- writes outputs relative to `sphinx_injection/` so the SPHINX branch stays separated from the baseline retrieval outputs
-- appends the total wall-clock time of each completed run to `sphinx_injection/Times`
-
-The posterior diagnostics helper also works on this branch:
+For batch execution, use:
 
 ```bash
-python "Earth_like_Atmosphere/Retrieval Tests/posterior_diagnostics.py" --mode recon --branch sphinx
+python campaign_run_gdae_queue.py --nproc 12 --keep-going
+python campaign_run_contam_queue.py --nproc 12 --keep-going
 ```
 
-### Step 3: Analyze the SPHINX retrievals
-
-The companion notebooks live in [sphinx_injection](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection):
-
-- [Retrieval_analysis no-contam_sphinx.ipynb](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_analysis%20no-contam_sphinx.ipynb)
-- [Retrieval_analysis_contam_sphinx.ipynb](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_analysis_contam_sphinx.ipynb)
-- [Retrieval_analysis G-DAE sphinx.ipynb](/C:/Proyectos/Astro/gdaespec/Earth_like_Atmosphere/Retrieval%20Tests/sphinx_injection/Retrieval_analysis%20G-DAE%20sphinx.ipynb)
-
-In particular, `Retrieval_analysis G-DAE sphinx.ipynb` preserves the preprocessing block needed to:
-
-- read the SPHINX-injected observation files
-- reconstruct the `*_recon.dat` products from `../observations_sphinx/`
-- evaluate the retrieval outputs against the clean reference spectrum
-
-## Retrieval Cases
-
-The currently documented coverage pairs for retrieval are:
-
-- `(0.00, 0.00)`
-- `(0.01, 0.08)`
-- `(0.08, 0.54)`
-- `(0.26, 0.70)`
-
-You can switch between cases either by editing the defaults inside the script or
-by exporting:
-
-- `RETRIEVAL_N_TRANSITS`
-- `RETRIEVAL_F_SPOT_CASE`
-- `RETRIEVAL_F_FAC_CASE`
-
-before launching the MPI run.
+The shell wrappers are optional. Prefer the Python queue commands when running
+on another machine.

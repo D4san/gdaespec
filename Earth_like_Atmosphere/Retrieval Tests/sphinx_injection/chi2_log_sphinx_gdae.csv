@@ -1,2 +1,0 @@
-planet_name,model_name,observation,metrics_basis,N,p,dof,MSE,rmse,rmse_ppm,chi2,chi2_reduced
-Trappist-1e,sphinx_recon_10T_0.26spot-0.70fac,pandexo_output_10transits_sphinx_fspot0.26_ffac0.70_recon.dat,median_retrieved_spectrum,385,11,374,2.553834132e-05,0.005053547399,5053.547399,5195807.772,13892.53415

@@ -3,72 +3,105 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![arXiv](https://img.shields.io/badge/arXiv-2602.10330-b31b1b.svg)](https://arxiv.org/abs/2602.10330)
-[![Powered by MultiREx](https://img.shields.io/badge/Powered%20by-MultiREx-blueviolet)](https://github.com/D4san/MultiREx-public)
-[![Powered by POSEIDON](https://img.shields.io/badge/Powered%20by-POSEIDON-007ec6)](https://github.com/MartianColonist/POSEIDON)
-[![Powered by TauREx 3](https://img.shields.io/badge/Powered%20by-TauREx%203-red)](https://github.com/ucl-exoplanets/TauREx3_public)
 
 <div align="center">
-  <img src="G-DAE_logo.webp" alt="G-DAESpec Logo" width="600"/>
+  <img src="G-DAE_logo.webp" alt="G-DAESpec logo" width="520"/>
 </div>
 
-## About
+This repository accompanies:
 
-This repository contains the code and data accompanying the paper:
+> **Efficient reduction of stellar contamination and noise in planetary transmission spectra using neural networks**<br>
+> Duque-Castaño, Zuluaga & Flor-Torres<br>
+> arXiv: [2602.10330](https://arxiv.org/abs/2602.10330)
 
-> **Efficient reduction of stellar contamination and noise in planetary transmission spectra using neural networks**
-> Duque-Castaño, Zuluaga & Flor-Torres (2025)
-> _Submitted to Astronomy & Astrophysics_
-> [arXiv:2602.10330](https://arxiv.org/abs/2602.10330)
+The code tests a General Denoising AutoEncoder (G-DAE) for transmission
+spectra affected by stellar contamination and observational noise. The project
+is organized around the two experiments discussed in the paper:
 
-## Overview
+1. `Earth_like_Atmosphere/`: TRAPPIST-1e analogue, including G-DAE training,
+   uncertainty-aware reconstruction, SPHINX/PHOENIX stellar contamination
+   checks, and POSEIDON retrieval tests.
+2. `Sub_Neptune_Atmosphere/`: K2-18b analogue, including spectra generation,
+   stellar contamination, autoencoder training, and evaluation.
 
-**G-DAESpec** implements a **G-DAE** (General Denoising AutoEncoder) designed to correct the effects of stellar contamination and noise in exoplanet transmission spectra.
+## Repository Map
 
-This work validates the G-DAE architecture using two distinct planetary cases:
+| Path | Purpose |
+| --- | --- |
+| [Earth_like_Atmosphere/](Earth_like_Atmosphere/) | Main Earth-like/TRAPPIST-1e experiment. |
+| [Earth_like_Atmosphere/Retrieval Tests/](Earth_like_Atmosphere/Retrieval%20Tests/) | POSEIDON five-observation retrieval campaign. |
+| [Earth_like_Atmosphere/stellar_contamination/](Earth_like_Atmosphere/stellar_contamination/) | PHOENIX and SPHINX stellar-contamination curves used by the Earth-like workflow. |
+| [Earth_like_Atmosphere/spec_data/](Earth_like_Atmosphere/spec_data/) | Earth-like spectral datasets derived from the referenced MultiREx example. |
+| [Sub_Neptune_Atmosphere/](Sub_Neptune_Atmosphere/) | K2-18b/Sub-Neptune experiment. |
+| [examples/](examples/) | Minimal example notebook for applying a trained G-DAE model. |
 
-1.  **Rocky Planets**: Using a **TRAPPIST-1e** analogue with an Earth-like atmosphere.
-2.  **Sub-Neptunes**: Using a **K2-18b** analogue.
+## Main Workflows
 
-The project leverages the **MultiREx** library for spectral handling and **POSEIDON** for atmospheric retrieval and validation.
+Recommended reading order:
 
-## Features
+1. Start with this README.
+2. Open [examples/Quick_Start_GDAE_Workflow.ipynb](examples/Quick_Start_GDAE_Workflow.ipynb)
+   for the shortest application-oriented workflow.
+3. Open [Earth_like_Atmosphere/README.md](Earth_like_Atmosphere/README.md) for
+   the TRAPPIST-1e case.
+4. Open
+   [Earth_like_Atmosphere/Retrieval Tests/README.md](Earth_like_Atmosphere/Retrieval%20Tests/README.md)
+   for the retrieval validation workflow.
+5. Open [Sub_Neptune_Atmosphere/README.md](Sub_Neptune_Atmosphere/README.md)
+   for the K2-18b case.
 
-- **Stellar Contamination Correction**: Removes noise introduced by stellar spots and faculae to recover the true planetary spectrum.
-- **Uncertainty-Aware Reconstruction**: The G-DAE provides reconstructed spectra together with their associated uncertainties, enabling seamless integration into Bayesian atmospheric retrieval pipelines.
-- **Deep Learning Architecture**: Utilizes a Denoising AutoEncoder (DAE) trained on simulated datasets.
-- **Broad Applicability**: Tested on both terrestrial and sub-Neptune atmospheric regimes.
-- **Validation**: Results are verified against standard Bayesian atmospheric retrieval methods (Nested Sampling via POSEIDON).
+### Earth-like atmosphere
 
-## Repository Structure
+Use [Earth_like_Atmosphere/README.md](Earth_like_Atmosphere/README.md) for the
+local workflow. The shortest reading order is:
 
-This repository is structured around the two primary applications of the G-DAE architecture presented in the paper.
+1. `01_G-DAE.ipynb`: data assembly and G-DAE training.
+2. `02_G-DAE_Analysis.ipynb`: reconstruction, metric, and uncertainty analysis.
+3. `Retrieval Tests/README.md`: POSEIDON retrieval campaign comparing G-DAE
+   preprocessing with explicit stellar-contamination retrievals.
 
-In the **Earth_like_Atmosphere** folder, you will find the work related to the **TRAPPIST-1e** analogue. This includes the notebooks for training the G-DAE and analyzing its performance, as well as a specific subdirectory for `Retrieval Tests` using POSEIDON. This folder also houses the necessary spectral data and the stellar contamination models used in this case study.
+### Sub-Neptune atmosphere
 
-By contrast, the **Sub_Neptune_Atmosphere** folder contains the **K2-18b** analogue experiments. Here, the workflow is broken down into sequential steps: generating the spectral library, calculating stellar contamination, training the AutoEncoder, and finally evaluating the G-DAE. The trained model and generated spectra are also stored here.
+Use [Sub_Neptune_Atmosphere/README.md](Sub_Neptune_Atmosphere/README.md). The
+notebooks are numbered in execution order:
 
-Each case study directory contains its own `README.md` with detailed instructions.
+1. `01_Spectra_Generation.ipynb`
+2. `02_Stellar_Contamination.ipynb`
+3. `03_AE_Training.ipynb`
+4. `04_G-DAE_Evaluation.ipynb`
 
-## Requirements
+## Environment
 
-The following key libraries are used in this project:
+The notebooks and scripts are scientific workflows rather than a packaged
+Python library. They require a Python/Jupyter environment with:
 
-- **[MultiREx](https://github.com/D4san/MultiREx-public)**: For handling exoplanet spectra.
-- **[POSEIDON](https://github.com/MartianColonist/POSEIDON)**: For atmospheric retrieval and spectra generation.
-- **[TauREx 3](https://github.com/ucl-exoplanets/TauREx3_public)**: Bayesian retrieval framework.
-- **TensorFlow / Keras**: For building and training the G-DAE models.
-- **Pandeia / PandExo**: For JWST instrument noise simulation.
-- **Scikit-learn, NumPy, Pandas, Matplotlib**: For data processing and visualization.
+- [MultiREx](https://github.com/D4san/MultiREx-public)
+- [POSEIDON](https://github.com/MartianColonist/POSEIDON)
+- [TauREx 3](https://github.com/ucl-exoplanets/TauREx3_public)
+- TensorFlow/Keras
+- PandExo/Pandeia
+- NumPy, Pandas, SciPy, scikit-learn, Matplotlib, Seaborn
+- MPI for the retrieval scripts
 
-### Opacity Data & Chemical Species
+Large opacity tables and some external model grids may need to be installed or
+downloaded outside the repository, depending on the experiment. The README files
+inside each data folder describe the expected sources.
 
-This project utilizes opacity data and chemical species line lists from the following sources:
+## Data and Generated Products
 
-- **[ExoMol](https://www.exomol.com/)**: Molecular line lists for exoplanet and other hot atmospheres.
-- **[ExoTransmit](https://github.com/elizakempton/Exo_Transmit)**: Transmission spectra calculation.
+The repository includes compact source data, notebooks, trained models, and a
+subset of retrieval products needed to inspect the paper workflow. Very large
+opacity tables are intentionally ignored by `.gitignore` and should be restored
+from their cited sources when rerunning the full spectral-generation steps.
 
-Please ensure to cite these works appropriately when using the data.
+The repository contents fall into three categories:
+
+- **Inputs**: `spec_data/`, `stellar_contamination/`, `waves.txt`, opacity/CIA
+  files, and PandExo input spectra.
+- **Executable workflow**: numbered notebooks and Python/MPI scripts.
+- **Generated products**: trained `.keras` models, `.npz` uncertainty archives,
+  `POSEIDON_output/`, plots, logs, and campaign CSV summaries.
 
 ## License
 
-[MIT License](LICENSE)
+This repository is released under the [MIT License](LICENSE).
