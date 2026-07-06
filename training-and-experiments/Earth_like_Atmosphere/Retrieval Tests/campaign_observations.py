@@ -15,10 +15,12 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import pandas as pd
 
 from campaign_common import (
     CAMPAIGN_DIR,
     CONTAMINATION_DIR,
+    EARTH_DIR,
     GDAE_MODEL_PATH,
     N_TRANSITS,
     CLEAN_SPECTRUM_PATH,
@@ -34,6 +36,9 @@ from campaign_common import (
 
 CONTAMINATION_PATTERN = re.compile(r"fspot(?P<f_spot>[0-9.]+)_ffac(?P<f_fac>[0-9.]+)\.txt$")
 TRIM_IDX = 18  # Drop the short-wavelength bins PandExo returns outside the useful range.
+DEFAULT_REF_FLAT: float | None = None
+REF_FLAT_EPS = 1e-12
+REF_FLAT_SOURCE_PATH = EARTH_DIR / 'spec_data' / 'airless_data.csv'
 
 
 def load_two_column_spectrum(path: Path) -> tuple[np.ndarray, np.ndarray]:
@@ -189,20 +194,56 @@ def bin_average_with_halfbins(
     return out.astype(np.float32)
 
 
-def normalize_min_max_1d(values: np.ndarray) -> np.ndarray:
+def infer_ref_flat_from_airless(
+    path: Path = REF_FLAT_SOURCE_PATH,
+    *,
+    atol: float = 1e-12,
+    rtol: float = 1e-8,
+) -> float:
+    """Infer a scalar flat reference depth from the experiment airless spectrum."""
+    n_points = int(np.loadtxt(EARTH_DIR / 'waves.txt').shape[0])
+    airless_df = pd.read_csv(path)
+    airless_numeric = airless_df.select_dtypes(include=[np.number])
+    depth = airless_numeric.iloc[0, -n_points:].to_numpy(dtype=np.float64)
+    ref_flat = float(np.median(depth))
+    if not np.allclose(depth, ref_flat, atol=atol, rtol=rtol):
+        raise ValueError("Airless spectrum is not flat enough to define a scalar ref_flat.")
+    if not np.isfinite(ref_flat) or ref_flat <= 0.0:
+        raise ValueError(f"Invalid ref_flat inferred from {path}: {ref_flat}")
+    return ref_flat
+
+
+def resolve_ref_flat(ref_flat: float | None = DEFAULT_REF_FLAT) -> float:
+    """Return an explicit scalar ref_flat or infer it from the experiment airless spectrum."""
+    if ref_flat is None:
+        return infer_ref_flat_from_airless()
+
+    value = float(ref_flat)
+    if not np.isfinite(value) or value <= 0.0:
+        raise ValueError(f"ref_flat must be a positive finite float, got {ref_flat}")
+    return value
+
+
+def to_log_ratio_1d(
+    values: np.ndarray,
+    ref_flat: float | None = DEFAULT_REF_FLAT,
+    eps: float = REF_FLAT_EPS,
+) -> np.ndarray:
+    """Transform physical transit depths to log(depth / ref_flat)."""
+    resolved_ref_flat = resolve_ref_flat(ref_flat)
     values = np.asarray(values, dtype=np.float32)
-    value_min = float(values.min())
-    value_max = float(values.max())
-    value_range = value_max - value_min
-    if value_range == 0.0:
-        return np.zeros_like(values)
-    return (values - value_min) / value_range
+    values = np.clip(values, eps, None)
+    return np.log(values / resolved_ref_flat).astype(np.float32)
 
 
-def inverse_min_max_1d(values_norm: np.ndarray, reference: np.ndarray) -> np.ndarray:
-    values_norm = np.asarray(values_norm, dtype=np.float32)
-    reference = np.asarray(reference, dtype=np.float32)
-    return values_norm * (float(reference.max()) - float(reference.min())) + float(reference.min())
+def from_log_ratio_1d(
+    values_log: np.ndarray,
+    ref_flat: float | None = DEFAULT_REF_FLAT,
+) -> np.ndarray:
+    """Map log(depth / ref_flat) back to physical transit depth."""
+    resolved_ref_flat = resolve_ref_flat(ref_flat)
+    values_log = np.asarray(values_log, dtype=np.float32)
+    return (np.exp(values_log) * resolved_ref_flat).astype(np.float32)
 
 
 def maybe_flip_observation_vectors(
@@ -237,6 +278,7 @@ def reconstruct_observation_file(
     model_path: Path = GDAE_MODEL_PATH,
     *,
     force_flip: bool = True,
+    ref_flat: float | None = DEFAULT_REF_FLAT,
 ) -> Path:
     """Use the trained G-DAE to reconstruct one noisy observation file."""
     observation = np.loadtxt(observation_path)
@@ -260,9 +302,10 @@ def reconstruct_observation_file(
     )
 
     model = load_autoencoder(model_path)
-    x_norm = normalize_min_max_1d(y_obs).reshape(1, -1).astype(np.float32)
-    y_recon_norm = model.predict(x_norm, verbose=0)[0].astype(np.float32)
-    y_recon = inverse_min_max_1d(y_recon_norm, y_clean_binned)
+    resolved_ref_flat = resolve_ref_flat(ref_flat)
+    x_log = to_log_ratio_1d(y_obs, resolved_ref_flat).reshape(1, -1).astype(np.float32)
+    y_recon_log = model.predict(x_log, verbose=0)[0].astype(np.float32)
+    y_recon = from_log_ratio_1d(y_recon_log, resolved_ref_flat)
 
     recon_path = output_dir / f"{observation_path.stem}_recon.dat"
     np.savetxt(recon_path, np.column_stack((wl, d_wl, y_recon, y_err)), fmt="%.10e")
@@ -344,3 +387,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+

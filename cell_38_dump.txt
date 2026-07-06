@@ -1,0 +1,175 @@
+PALETTE = {
+    "ink": "#264653",
+    "teal": "#2A9D8F",  # Reconstructed
+    "sand": "#E9C46A",  # Clean
+    "apricot": "#F4A261",
+    "tomato": "#E76F51",  # Input
+    "ghost": "#8D99AE",   # Reference overlay
+}
+
+clean_color = PALETTE["sand"]
+input_color = PALETTE["tomato"]
+reconstructed_color = PALETTE["teal"]
+reference_color = PALETTE["ghost"]
+
+X_clean = np.asarray(X_clean, dtype=object)
+X_noisy = np.asarray(X_noisy, dtype=object)
+X_reconstructed = np.asarray(X_reconstructed, dtype=object)
+waves = np.asarray(waves)
+
+num_samples = 3
+indices = [0, 1, 2]
+row_labels = ["Airless", r"CO$_2$", r"CH$_4$ + O$_3$"]
+col_labels = ["Uncontaminated", "Input", "Reconstructed"]
+title_colors = [clean_color, input_color, reconstructed_color]
+
+x = waves[::-1]
+ppm_scale = 1e6
+
+def _style_axis(ax):
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.tick_params(direction="out", length=3, width=0.8)
+    ax.grid(True, axis="both", alpha=0.18, linewidth=0.8)
+    ax.margins(x=0)
+
+def _boxed_col_title(ax, text, edge_color):
+    ax.text(
+        0.5,
+        1.06,
+        text,
+        transform=ax.transAxes,
+        ha="center",
+        va="bottom",
+        fontsize=12,
+        color="black",
+        fontweight="bold",
+        bbox=dict(
+            boxstyle="round,pad=0.24",
+            fc="white",
+            ec=edge_color,
+            lw=1.4,
+            alpha=0.96,
+        ),
+        clip_on=False,
+    )
+
+fig, axes = plt.subplots(
+    num_samples,
+    3,
+    figsize=(11.5, 7.6),
+    sharex=True,
+    sharey=False,
+    constrained_layout=True,
+)
+
+for j in range(3):
+    _boxed_col_title(axes[0, j], col_labels[j], title_colors[j])
+
+for i, idx in enumerate(indices):
+    clean_curve = np.asarray(X_clean[idx], dtype=np.float32) * ppm_scale
+    noisy_curve = np.asarray(X_noisy[idx], dtype=np.float32) * ppm_scale
+    reconstructed_curve = np.asarray(X_reconstructed[idx], dtype=np.float32) * ppm_scale
+
+    # Left / right panels compare the physical signal at the same zoom level.
+    if i == 0:
+        # Use the signal and input limits of the CO2 row (row 1) to match scales
+        ref_clean = np.asarray(X_clean[1], dtype=np.float32) * ppm_scale
+        ref_reconstructed = np.asarray(X_reconstructed[1], dtype=np.float32) * ppm_scale
+        ref_noisy = np.asarray(X_noisy[1], dtype=np.float32) * ppm_scale
+
+        signal_stack = np.concatenate([ref_clean, ref_reconstructed])
+        signal_min = float(signal_stack.min())
+        signal_max = float(signal_stack.max())
+        signal_span = max(signal_max - signal_min, 1.0)
+        signal_pad = 0.18 * signal_span
+
+        input_min = float(ref_noisy.min())
+        input_max = float(ref_noisy.max())
+        input_span = max(input_max - input_min, 1.0)
+        input_pad = 0.10 * input_span
+    else:
+        signal_stack = np.concatenate([clean_curve, reconstructed_curve])
+        signal_min = float(signal_stack.min())
+        signal_max = float(signal_stack.max())
+        signal_span = max(signal_max - signal_min, 1.0)
+        signal_pad = 0.18 * signal_span
+
+        input_min = float(noisy_curve.min())
+        input_max = float(noisy_curve.max())
+        input_span = max(input_max - input_min, 1.0)
+        input_pad = 0.10 * input_span
+
+    axes[i, 0].plot(x, clean_curve, color=clean_color, lw=2.0, zorder=3)
+
+    axes[i, 1].plot(
+        x,
+        clean_curve,
+        color=reference_color,
+        lw=1.0,
+        ls="--",
+        alpha=0.8,
+        zorder=2,
+    )
+    axes[i, 1].plot(x, noisy_curve, color=input_color, lw=1.5, zorder=3)
+
+    axes[i, 2].plot(x, reconstructed_curve, color=reconstructed_color, lw=2.0, zorder=3)
+
+    for j in range(3):
+        _style_axis(axes[i, j])
+
+    axes[i, 0].set_ylim(signal_min - signal_pad, signal_max + signal_pad)
+    axes[i, 2].set_ylim(signal_min - signal_pad, signal_max + signal_pad)
+    axes[i, 1].set_ylim(input_min - input_pad, input_max + input_pad)
+
+    row_badge_x = 0.055
+    axes[i, 0].text(
+        row_badge_x,
+        0.98,
+        row_labels[i],
+        transform=axes[i, 0].transAxes,
+        ha="left",
+        va="top",
+        fontsize=10,
+        fontstyle="italic",
+        fontweight="semibold",
+        bbox=dict(
+            boxstyle="round,pad=0.26",
+            fc="white",
+            ec=PALETTE["ink"],
+            lw=0.8,
+            alpha=0.98,
+        ),
+    )
+
+    if i == 2:
+        feature_y = signal_max - 0.18 * signal_span
+        axes[i, 0].text(3.2, feature_y, r"CH$_4$", fontsize=10, color="black")
+        axes[i, 0].text(4.7, feature_y, r"O$_3$", fontsize=10, color="black")
+
+    if i < num_samples - 1:
+        for j in range(3):
+            axes[i, j].tick_params(bottom=False, labelbottom=False)
+
+for ax in axes[-1, :]:
+    ax.set_xlabel(r"Wavelength [$\mu$m]", fontsize=12)
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(nbins=6))
+
+for i in range(num_samples):
+    axes[i, 0].set_ylabel(r"$(R_p / R_\star)^2$ [ppm]", fontsize=11)
+    axes[i, 1].tick_params(left=False, labelleft=False)
+    axes[i, 2].tick_params(left=False, labelleft=False)
+
+axes[0, 1].text(
+    0.04,
+    0.90,
+    "Dashed: clean reference",
+    transform=axes[0, 1].transAxes,
+    fontsize=9,
+    color=reference_color,
+    bbox=dict(boxstyle="round,pad=0.22", fc="white", ec="none", alpha=0.8),
+)
+
+# plt.savefig("plots/autoencoder.svg", format="svg", dpi=500)
+# plt.savefig("plots/autoencoder.pdf", format="pdf", dpi=500)
+# plt.show()
