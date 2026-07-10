@@ -60,3 +60,11 @@ Sub_Neptune_Atmosphere/opacidades-todas/
 **/*stats.dat
 **/*summary.txt
 **/*ev.dat
+
+# Preserve Earth-like campaign artifacts from week-long retrieval runs.
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/test_*/**/POSEIDON_output/
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/test_*/**/POSEIDON_output/**
+
+# Preserve logs from the completed Earth-like retrieval campaign.
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/*.log

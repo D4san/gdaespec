@@ -1,0 +1,35 @@
+Queued Contam + Chem jobs: 17
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_03 --branch sphinx --strategy contam --f-spot 0.01 --f-fac 0.08
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_110438_test_03_sphinx_contam_0.01spot-0.08fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_03 --branch sphinx --strategy contam --f-spot 0.08 --f-fac 0.54
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_130109_test_03_sphinx_contam_0.08spot-0.54fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_03 --branch sphinx --strategy contam --f-spot 0.26 --f-fac 0.70
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_151744_test_03_sphinx_contam_0.26spot-0.70fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch phoenix --strategy contam --f-spot 0.00 --f-fac 0.00
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_200636_test_04_phoenix_contam_0.00spot-0.00fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch phoenix --strategy contam --f-spot 0.01 --f-fac 0.08
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_214142_test_04_phoenix_contam_0.01spot-0.08fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch phoenix --strategy contam --f-spot 0.08 --f-fac 0.54
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260708_235406_test_04_phoenix_contam_0.08spot-0.54fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch phoenix --strategy contam --f-spot 0.26 --f-fac 0.70
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_024913_test_04_phoenix_contam_0.26spot-0.70fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch sphinx --strategy contam --f-spot 0.01 --f-fac 0.08
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_063321_test_04_sphinx_contam_0.01spot-0.08fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch sphinx --strategy contam --f-spot 0.08 --f-fac 0.54
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_082404_test_04_sphinx_contam_0.08spot-0.54fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_04 --branch sphinx --strategy contam --f-spot 0.26 --f-fac 0.70
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_103621_test_04_sphinx_contam_0.26spot-0.70fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch phoenix --strategy contam --f-spot 0.00 --f-fac 0.00
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_143058_test_05_phoenix_contam_0.00spot-0.00fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch phoenix --strategy contam --f-spot 0.01 --f-fac 0.08
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_161149_test_05_phoenix_contam_0.01spot-0.08fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch phoenix --strategy contam --f-spot 0.08 --f-fac 0.54
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_194325_test_05_phoenix_contam_0.08spot-0.54fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch phoenix --strategy contam --f-spot 0.26 --f-fac 0.70
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260709_233928_test_05_phoenix_contam_0.26spot-0.70fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch sphinx --strategy contam --f-spot 0.01 --f-fac 0.08
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260710_031655_test_05_sphinx_contam_0.01spot-0.08fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch sphinx --strategy contam --f-spot 0.08 --f-fac 0.54
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260710_051216_test_05_sphinx_contam_0.08spot-0.54fac.log
+mpirun -n 12 /home/dasan/anaconda3/envs/POSEIDON/bin/python -u campaign_retrieval_mpi.py --test-id test_05 --branch sphinx --strategy contam --f-spot 0.26 --f-fac 0.70
+  log: /mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/20260710_072957_test_05_sphinx_contam_0.26spot-0.70fac.log
