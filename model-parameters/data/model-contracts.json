@@ -1,0 +1,19 @@
+{
+  "contract_version": 1,
+  "models": {
+    "G-DAE-EarthLike.keras": {
+      "contract": "log_ratio_ref_flat_v1",
+      "ref_flat": 0.0050068177751589,
+      "channels": 385,
+      "wavelength_order": "descending",
+      "sha256": "2eef4becfa00b7eafcb0cc0ba012b9654d5b613bc7c64ab918c3a170af256d0f"
+    },
+    "G-DAE-SubNeptune.keras": {
+      "contract": "log_ratio_ref_flat_v1",
+      "ref_flat": 0.0023243496509944973,
+      "channels": 385,
+      "wavelength_order": "descending",
+      "sha256": "445e46a94da9ed253418e6c58852de768d6751d35c925ba6fcbf60e0d35fe458"
+    }
+  }
+}

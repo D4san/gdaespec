@@ -7,5 +7,12 @@ without walking through the full experiment workflow.
 | --- | --- |
 | `G-DAE-Example.ipynb` | Earth-like G-DAE example using one campaign observation and its clean reference. |
 
-The input files are `data/observation.dat` and `data/reference.dat`. Both are
-small copies derived from the Earth-like retrieval campaign.
+The input files are `data/observation.dat` and `data/reference.dat`. The clean
+reference is used only to evaluate the reconstruction and prepare the plots.
+
+## Model contract
+
+The published models use `log(depth / ref_flat)` as their input and output
+representation. Predictions are returned to physical transit-depth units with
+`exp(prediction) * ref_flat`. The scalar reference depths, channel count,
+wavelength order, and file hashes are recorded in `data/model-contracts.json`.
