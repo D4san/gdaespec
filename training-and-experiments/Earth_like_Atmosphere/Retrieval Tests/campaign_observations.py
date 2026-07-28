@@ -40,6 +40,8 @@ DEFAULT_REF_FLAT: float | None = None
 REF_FLAT_EPS = 1e-12
 REF_FLAT_SOURCE_PATH = EARTH_DIR / 'spec_data' / 'airless_data.csv'
 
+DEFAULT_UQ_PASSES = 100
+DEFAULT_UQ_SEED = 12345
 
 def load_two_column_spectrum(path: Path) -> tuple[np.ndarray, np.ndarray]:
     """Load a wavelength/depth or wavelength/epsilon table sorted by wavelength."""
@@ -246,30 +248,65 @@ def from_log_ratio_1d(
     return (np.exp(values_log) * resolved_ref_flat).astype(np.float32)
 
 
-def maybe_flip_observation_vectors(
-    wl: np.ndarray,
-    d_wl: np.ndarray,
-    y_obs: np.ndarray,
-    y_err: np.ndarray,
-    y_clean_binned: np.ndarray,
-    *,
-    force_flip: bool,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    if not force_flip:
-        return wl, d_wl, y_obs, y_err, y_clean_binned
-    return (
-        wl[::-1].copy(),
-        d_wl[::-1].copy(),
-        y_obs[::-1].copy(),
-        y_err[::-1].copy(),
-        y_clean_binned[::-1].copy(),
-    )
-
-
 def load_autoencoder(model_path: Path = GDAE_MODEL_PATH) -> Any:
     from tensorflow import keras
 
     return keras.models.load_model(model_path)
+
+
+def propagate_reconstruction_uncertainty(
+    model: Any,
+    y_obs: np.ndarray,
+    y_err: np.ndarray,
+    ref_flat: float,
+    *,
+    n_passes: int = DEFAULT_UQ_PASSES,
+    seed: int | None = DEFAULT_UQ_SEED,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Estimate the notebook-consistent predictive reconstruction and error.
+
+    MC dropout is evaluated repeatedly for the fixed observed spectrum. Every
+    prediction is transformed back to physical transit-depth space before its
+    mean and epistemic standard deviation are calculated. The total diagonal
+    error follows the analysis notebook contract:
+
+        sigma_total**2 = sigma_epi**2 + (0.5 * sigma_inst)**2
+
+    The campaign files do not contain a wavelength covariance matrix, so only
+    the diagonal of this predictive uncertainty is written to ``*_recon.dat``.
+    """
+    y_obs = np.asarray(y_obs, dtype=np.float32)
+    y_err = np.asarray(y_err, dtype=np.float32)
+    if y_obs.ndim != 1 or y_err.shape != y_obs.shape:
+        raise ValueError(
+            f"Expected 1D y_obs/y_err with matching shapes, got {y_obs.shape} and {y_err.shape}."
+        )
+    if not np.all(np.isfinite(y_obs)):
+        raise ValueError("Observed transit depths must be finite.")
+    if np.any(~np.isfinite(y_err)) or np.any(y_err <= 0.0):
+        raise ValueError("Observed uncertainties must be finite and strictly positive.")
+    if int(n_passes) < 2:
+        raise ValueError(f"n_passes must be at least 2 to estimate a standard deviation, got {n_passes}.")
+
+    resolved_ref_flat = resolve_ref_flat(ref_flat)
+    if seed is not None:
+        from tensorflow import keras
+
+        keras.utils.set_random_seed(seed)
+
+    observed_log = to_log_ratio_1d(y_obs, resolved_ref_flat).reshape(1, -1)
+    repeated_log = np.repeat(observed_log, int(n_passes), axis=0)
+    predictions_log = model(repeated_log, training=True).numpy()
+    predictions = from_log_ratio_1d(predictions_log, resolved_ref_flat)
+
+    # Average after returning every realization to physical transit-depth
+    # space. In general, mean(exp(x)) is not exp(mean(x)).
+    recon_mean = np.mean(predictions, axis=0, dtype=np.float64).astype(np.float32)
+    sigma_epi = np.std(predictions, axis=0, ddof=1).astype(np.float32)
+    sigma_ale = np.float32(0.5) * y_err
+    recon_sigma = np.sqrt(sigma_epi**2 + sigma_ale**2).astype(np.float32)
+    recon_sigma = np.maximum(recon_sigma, REF_FLAT_EPS)
+    return recon_mean, recon_sigma
 
 
 def reconstruct_observation_file(
@@ -277,10 +314,11 @@ def reconstruct_observation_file(
     output_dir: Path,
     model_path: Path = GDAE_MODEL_PATH,
     *,
-    force_flip: bool = True,
     ref_flat: float | None = DEFAULT_REF_FLAT,
+    uq_passes: int = DEFAULT_UQ_PASSES,
+    uq_seed: int | None = DEFAULT_UQ_SEED,
 ) -> Path:
-    """Use the trained G-DAE to reconstruct one noisy observation file."""
+    """Reconstruct one noisy observation and propagate its uncertainty."""
     observation = np.loadtxt(observation_path)
     if observation.ndim != 2 or observation.shape[1] < 4:
         raise ValueError(f"Expected four columns in {observation_path}, got {observation.shape}.")
@@ -292,23 +330,40 @@ def reconstruct_observation_file(
 
     wl_clean, y_clean = load_two_column_spectrum(CLEAN_SPECTRUM_PATH)
     y_clean_binned = bin_average_with_halfbins(wl_clean, y_clean, wl, d_wl)
-    wl, d_wl, y_obs, y_err, y_clean_binned = maybe_flip_observation_vectors(
-        wl,
-        d_wl,
-        y_obs,
-        y_err,
-        y_clean_binned,
-        force_flip=force_flip,
-    )
+    # Contract log_ratio_ref_flat_v1: the Earth-like G-DAE was trained with
+    # wavelengths in strictly descending order. Enforce the contract instead
+    # of relying on the input file's incidental ordering.
+    descending = np.argsort(wl)[::-1]
+    wl = wl[descending].copy()
+    d_wl = d_wl[descending].copy()
+    y_obs = y_obs[descending].copy()
+    y_err = y_err[descending].copy()
+    y_clean_binned = y_clean_binned[descending].copy()
+
+    if uq_seed is not None:
+        from tensorflow import keras
+
+        # Keras creates the Dropout seed generators while deserializing the
+        # model, so seed before loading it rather than only before inference.
+        keras.utils.set_random_seed(uq_seed)
 
     model = load_autoencoder(model_path)
     resolved_ref_flat = resolve_ref_flat(ref_flat)
-    x_log = to_log_ratio_1d(y_obs, resolved_ref_flat).reshape(1, -1).astype(np.float32)
-    y_recon_log = model.predict(x_log, verbose=0)[0].astype(np.float32)
-    y_recon = from_log_ratio_1d(y_recon_log, resolved_ref_flat)
+    y_recon, y_recon_err = propagate_reconstruction_uncertainty(
+        model,
+        y_obs,
+        y_err,
+        resolved_ref_flat,
+        n_passes=uq_passes,
+        seed=uq_seed,
+    )
 
     recon_path = output_dir / f"{observation_path.stem}_recon.dat"
-    np.savetxt(recon_path, np.column_stack((wl, d_wl, y_recon, y_err)), fmt="%.10e")
+    np.savetxt(
+        recon_path,
+        np.column_stack((wl, d_wl, y_recon, y_recon_err)),
+        fmt="%.10e",
+    )
     return recon_path
 
 
@@ -318,6 +373,8 @@ def export_case_observation(
     *,
     overwrite: bool = False,
     reconstruct_only: bool = False,
+    uq_passes: int = DEFAULT_UQ_PASSES,
+    uq_seed: int | None = DEFAULT_UQ_SEED,
 ) -> tuple[Path, Path]:
     """Generate the noisy observation and reconstruction for one configured case."""
     obs_dir = observations_dir(test_id, case.branch)
@@ -336,7 +393,12 @@ def export_case_observation(
     elif not observation_path.exists():
         raise FileNotFoundError(f"Cannot reconstruct missing observation: {observation_path}")
 
-    recon_path = reconstruct_observation_file(observation_path, obs_dir)
+    recon_path = reconstruct_observation_file(
+        observation_path,
+        obs_dir,
+        uq_passes=uq_passes,
+        uq_seed=uq_seed,
+    )
     print(f"Saved reconstruction : {recon_path}")
     return observation_path, recon_path
 
@@ -352,6 +414,18 @@ def parse_args() -> argparse.Namespace:
         "--reconstruct-only",
         action="store_true",
         help="Do not run PandExo; rebuild *_recon.dat from existing observations.",
+    )
+    parser.add_argument(
+        "--uq-passes",
+        type=int,
+        default=DEFAULT_UQ_PASSES,
+        help=f"Monte Carlo passes for propagated reconstruction errors (default: {DEFAULT_UQ_PASSES}).",
+    )
+    parser.add_argument(
+        "--uq-seed",
+        type=int,
+        default=DEFAULT_UQ_SEED,
+        help=f"NumPy and Keras seed for reproducible uncertainty propagation (default: {DEFAULT_UQ_SEED}).",
     )
     return parser.parse_args()
 
@@ -382,14 +456,10 @@ def main() -> None:
             test_id,
             overwrite=args.overwrite,
             reconstruct_only=args.reconstruct_only,
+            uq_passes=args.uq_passes,
+            uq_seed=args.uq_seed,
         )
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-

@@ -16,7 +16,10 @@ That script starts from `pandexo_spec.txt`, applies the selected
 `epsilon(lambda)` contamination curve from `../stellar_contamination/`, and
 writes the noisy observation files under `campaign_5obs/test_XX/<branch>/observations/`.
 It also writes the matching G-DAE reconstructions as `*_recon.dat`.
-
+For the G-DAE branch, the third column is the physical-space mean of the
+MC-dropout ensemble. The fourth column follows the analysis-notebook contract:
+it combines the fixed-input epistemic spread with half the PandExo instrumental
+uncertainty in quadrature.
 The two retrieval strategies are:
 
 1. `gdae`
@@ -94,6 +97,7 @@ For batch execution, use:
 
 ```bash
 python campaign_run_gdae_queue.py --nproc 12 --keep-going
+python campaign_run_gdae_queue.py --nproc 12 --rerun --include-test01 --keep-going
 python campaign_run_contam_queue.py --nproc 12 --keep-going
 ```
 

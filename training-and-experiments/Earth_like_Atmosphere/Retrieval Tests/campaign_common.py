@@ -22,7 +22,10 @@ INSTRUMENTS = ["JWST_NIRSpec_PRISM"]
 
 RETRIEVAL_TESTS_DIR = Path(__file__).resolve().parent
 EARTH_DIR = RETRIEVAL_TESTS_DIR.parent
-CAMPAIGN_DIR = RETRIEVAL_TESTS_DIR / "campaign_5obs"
+_DEFAULT_CAMPAIGN_DIR = RETRIEVAL_TESTS_DIR / "campaign_5obs"
+# Allow long-running retrievals to keep their MultiNest checkpoints on a
+# native WSL filesystem instead of the Windows-mounted repository path.
+CAMPAIGN_DIR = Path(os.environ.get("GDAE_CAMPAIGN_DIR", _DEFAULT_CAMPAIGN_DIR)).expanduser()
 CLEAN_SPECTRUM_PATH = RETRIEVAL_TESTS_DIR / "pandexo_spec.txt"
 GDAE_MODEL_PATH = EARTH_DIR / "Models" / "G-DAE.keras"
 CONTAMINATION_DIR = EARTH_DIR / "stellar_contamination"

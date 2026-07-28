@@ -9,6 +9,7 @@ POSEIDON result files before launching each MPI job.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -37,6 +38,7 @@ def build_jobs(
     branch_filter: str | None,
     f_spot_filter: float | None,
     f_fac_filter: float | None,
+    rerun: bool = False,
 ) -> list[tuple[str, str, float, float]]:
     """Build the list of missing campaign cases to run."""
     jobs: list[tuple[str, str, float, float]] = []
@@ -51,7 +53,7 @@ def build_jobs(
                     continue
                 if f_fac_filter is not None and abs(case.f_fac - f_fac_filter) > 1.0e-9:
                     continue
-                if result_exists(test_id, branch, case.model_name("gdae")):
+                if not rerun and result_exists(test_id, branch, case.model_name("gdae")):
                     continue
                 jobs.append((test_id, branch, case.f_spot, case.f_fac))
     return jobs
@@ -64,8 +66,9 @@ def run_job(job: tuple[str, str, float, float], nproc: int, dry_run: bool) -> in
     log_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = log_dir / f"{stamp}_{test_id}_{branch}_gdae_{f_spot:.2f}spot-{f_fac:.2f}fac.log"
+    mpi_launcher = os.environ.get("GDAE_MPI_LAUNCHER", "mpirun")
     cmd = [
-        "mpirun",
+        mpi_launcher,
         "-n",
         str(nproc),
         sys.executable,
@@ -107,6 +110,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--f-spot", type=float, default=None)
     parser.add_argument("--f-fac", type=float, default=None)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--rerun", action="store_true", help="Run G-DAE jobs even when result files already exist.")
     parser.add_argument("--keep-going", action="store_true")
     return parser.parse_args()
 
@@ -122,6 +126,7 @@ def main() -> int:
         branch_filter=args.branch,
         f_spot_filter=args.f_spot,
         f_fac_filter=args.f_fac,
+        rerun=args.rerun,
     )
     print(f"Queued G-DAE jobs: {len(jobs)}")
     for job in jobs:
