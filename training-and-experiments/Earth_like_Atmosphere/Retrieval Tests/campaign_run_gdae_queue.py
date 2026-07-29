@@ -9,11 +9,9 @@ POSEIDON result files before launching each MPI job.
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 from datetime import datetime
-from pathlib import Path
 
 from campaign_common import CAMPAIGN_DIR, TEST_IDS, iter_cases, normalize_test_id
 
@@ -66,9 +64,8 @@ def run_job(job: tuple[str, str, float, float], nproc: int, dry_run: bool) -> in
     log_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = log_dir / f"{stamp}_{test_id}_{branch}_gdae_{f_spot:.2f}spot-{f_fac:.2f}fac.log"
-    mpi_launcher = os.environ.get("GDAE_MPI_LAUNCHER", "mpirun")
     cmd = [
-        mpi_launcher,
+        "mpirun",
         "-n",
         str(nproc),
         sys.executable,

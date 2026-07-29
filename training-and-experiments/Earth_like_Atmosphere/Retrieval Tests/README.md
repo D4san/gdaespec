@@ -50,7 +50,6 @@ The campaign includes two contamination branches:
 | `campaign_plot_observations.py` | Plots raw observations and G-DAE reconstructions across tests. |
 | `campaign_run_gdae_queue.py` | Runs the missing `gdae` campaign jobs. |
 | `campaign_run_contam_queue.py` | Runs the missing `contam` campaign jobs. |
-| `run_gdae_queue.sh`, `run_contam_queue.sh` | Local WSL queue helpers. Edit paths before using elsewhere. |
 | `pandexo_spec.txt` | Clean spectrum used as the PandExo input baseline. |
 | `campaign_5obs/` | Campaign CSV summaries and generated per-test products. |
 
@@ -66,8 +65,8 @@ The campaign includes two contamination branches:
   figures for each synthetic observation.
 - `plots/`: aggregate figures generated from the campaign outputs.
 
-Large generated products inside each test folder are ignored by Git. The CSV
-summaries are the compact campaign record.
+The observations, samples, MultiNest state, POSEIDON products, figures, and
+logs are preserved together with the aggregate tables.
 
 ## Inputs
 
@@ -77,29 +76,30 @@ The campaign expects these project files:
 - `../Models/G-DAE.keras`
 - `../stellar_contamination/`
 
-The retrieval step also requires a working POSEIDON, PandExo/Pandeia, and MPI
-environment with the corresponding opacity and stellar-model data available
-locally.
+Regenerating noisy observations requires PandExo/Pandeia. Running retrievals
+requires a working POSEIDON installation with MultiNest, MPI, `mpirun`, and the
+corresponding opacity and stellar-model data available locally.
 
 ## Typical Workflow
 
-Run commands from this directory.
+The included retrieval record can be inspected without rerunning POSEIDON:
+
+```bash
+python campaign_plot_aggregates.py
+python campaign_plot_parameters.py
+```
+
+Regenerating the full experiment is an advanced workflow. First create the
+layout and observations, then launch the two queues:
 
 ```bash
 python campaign_setup.py
-python campaign_observations.py --test-id test_02 --branch all
-mpirun -n 12 python -u campaign_retrieval_mpi.py --test-id test_02 --branch phoenix --strategy gdae --f-spot 0.26 --f-fac 0.70
-python campaign_metrics.py --test-id test_02 --branch phoenix --strategy gdae --f-spot 0.26 --f-fac 0.70
-python campaign_plot_aggregates.py
+python campaign_observations.py --test-id test_01 --branch all
+python campaign_run_gdae_queue.py --nproc 12 --include-test01 --keep-going
+python campaign_run_contam_queue.py --nproc 12 --include-test01 --keep-going
 ```
 
-For batch execution, use:
-
-```bash
-python campaign_run_gdae_queue.py --nproc 12 --keep-going
-python campaign_run_gdae_queue.py --nproc 12 --rerun --include-test01 --keep-going
-python campaign_run_contam_queue.py --nproc 12 --keep-going
-```
-
-The shell wrappers are optional. Prefer the Python queue commands when running
-on another machine.
+Repeat the observation command for `test_02` through `test_05`. The queue
+commands invoke `mpirun` and skip cases whose result file already exists.
+Use the direct `campaign_retrieval_mpi.py` command only to run one selected
+case.

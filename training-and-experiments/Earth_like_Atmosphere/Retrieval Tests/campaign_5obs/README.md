@@ -1,7 +1,7 @@
 # campaign_5obs
 
 This folder stores the five-observation retrieval campaign for the Earth-like
-TRAPPIST-1e analogue.
+TRAPPIST-1e analog.
 
 Each `test_XX` folder is one independent 10-transit synthetic observation. For
 each test, the campaign compares:
@@ -10,13 +10,13 @@ each test, the campaign compares:
 - `contam`: retrieval on the raw contaminated spectrum with stellar
   contamination fitted inside POSEIDON.
 
-The compact campaign outputs are:
+The aggregate campaign tables are:
 
 - `times.csv`: `id,branch,f_spot,f_fac,strategy,delta_time`
 - `metrics.csv`: `id,branch,f_spot,f_fac,strategy,MSE,chi2_reduced`
 
-Generated observations, POSEIDON products, figures, logs, and plots are local
-run products and are ignored by Git.
+The observations, POSEIDON products, samples, state files, figures, logs, and
+plots are preserved as the retrieval record.
 
 Typical commands are documented in the parent
 [`README.md`](../README.md).

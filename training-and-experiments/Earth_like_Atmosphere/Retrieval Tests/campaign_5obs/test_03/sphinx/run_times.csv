@@ -1,7 +1,4 @@
 id,branch,f_spot,f_fac,strategy,delta_time
-test_03,sphinx,0.01,0.08,gdae,19.05893886
-test_03,sphinx,0.08,0.54,gdae,18.92364839
-test_03,sphinx,0.26,0.70,gdae,18.84287049
-test_03,sphinx,0.01,0.08,contam,113.6374491
-test_03,sphinx,0.08,0.54,contam,134.8634603
-test_03,sphinx,0.26,0.70,contam,287.2660216
+test_03,sphinx,0.01,0.08,gdae,29.27635622
+test_03,sphinx,0.08,0.54,gdae,36.10312735
+test_03,sphinx,0.26,0.70,gdae,29.23705017

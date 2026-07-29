@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_observations.py", line 465, in <module>
+    main()
+  File "/mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_observations.py", line 454, in main
+    export_case_observation(
+  File "/mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_observations.py", line 396, in export_case_observation
+    recon_path = reconstruct_observation_file(
+  File "/mnt/c/Proyectos/Astro/gdaespec/training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_observations.py", line 344, in reconstruct_observation_file
+    from tensorflow import keras
+ModuleNotFoundError: No module named 'tensorflow'

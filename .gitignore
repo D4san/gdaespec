@@ -28,14 +28,36 @@ tmp/
 *.log
 *.out
 *.err
+*.pid
+
+# Local diagnostic and superseded plots
+training-and-experiments/Earth_like_Atmosphere/plots/test_airless_chi2.png
+training-and-experiments/Earth_like_Atmosphere/plots/test_airless_log_chi2.png
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/recon_over_clean_preview.png
+training-and-experiments/Sub_Neptune_Atmosphere/plots/final_random_selection-total_uq.png
+training-and-experiments/Sub_Neptune_Atmosphere/plots/final_random_selection-total_uq.pdf
+
+# Local retrieval archive records that reference machine-specific paths
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/GDAE_JULY_2026_RETRIEVAL_ARCHIVE.md
+
+# Local retrieval consolidation workspaces and one-off plotting helper
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs_corrected_20260724_v1/
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs_july2026_comparison/
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_plot_gdae_july2026.py
+
+# Machine-specific WSL launch helpers
+**/run_gdae_queue.sh
+**/run_contam_queue.sh
+**/resume_contam_queue.sh
 
 # Downloaded/local science inputs
 /CIA/
 /Phoenix/
 /opacidades-todas/
 **/CIA/
-Sub_Neptune_Atmosphere/Phoenix/
-Sub_Neptune_Atmosphere/opacidades-todas/
+**/Phoenix/
+**/opacities/
+**/opacidades-todas/
 *.zip
 
 # Large generated data products
@@ -68,3 +90,11 @@ Sub_Neptune_Atmosphere/opacidades-todas/
 # Preserve logs from the completed Earth-like retrieval campaign.
 !training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/
 !training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/logs/*.log
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/*.log
+
+# Keep only the two official aggregate retrieval figures (PNG and PDF).
+training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/*
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/aggregate_retrieval_metrics_1sigma_test01_05_branch_strategy_rmse_signal_pct_final.png
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/aggregate_retrieval_metrics_1sigma_test01_05_branch_strategy_rmse_signal_pct_final.pdf
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/aggregate_retrieved_parameters_1sigma_test01_05_branch_strategy_compact_total.png
+!training-and-experiments/Earth_like_Atmosphere/Retrieval Tests/campaign_5obs/plots/aggregate_retrieved_parameters_1sigma_test01_05_branch_strategy_compact_total.pdf

@@ -3,6 +3,9 @@
 This directory stores the stellar-contamination curves used in the Earth-like
 TRAPPIST-1 workflow.
 
+Each contamination file contains two columns: wavelength in microns and the
+dimensionless contamination factor $\epsilon(\lambda)$.
+
 ## Contents
 
 - `TRAPPIST-1_contam_fspot*_ffac*.txt`
@@ -13,7 +16,7 @@ TRAPPIST-1 workflow.
 - `generate_sphinx_trappist1_contamination.ipynb`
   Notebook used to generate the SPHINX curves.
 - `sphinx_data/`
-  Local SPHINX stellar grids used as input to generate `epsilon(lambda)`.
+  Local SPHINX stellar grids used as input to generate $\epsilon(\lambda)$.
 
 ## Role in the Workflow
 

@@ -1,7 +1,7 @@
 # G-DAESpec
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![arXiv](https://img.shields.io/badge/arXiv-2602.10330-b31b1b.svg)](https://arxiv.org/abs/2602.10330)
 
 <div align="center">
@@ -86,18 +86,16 @@ notebooks are numbered in execution order:
 ## Environment
 
 The notebooks and scripts are scientific workflows rather than a packaged
-Python library. They require a Python/Jupyter environment with:
+Python library. Install the shared dependencies with:
 
-- Install dependencies from [requirements.txt](requirements.txt):
-   `pip install -r requirements.txt`
+```bash
+pip install -r requirements.txt
+```
 
-- [MultiREx](https://github.com/D4san/MultiREx-public)
-- [POSEIDON](https://github.com/MartianColonist/POSEIDON)
-- [TauREx 3](https://github.com/ucl-exoplanets/TauREx3_public)
-- TensorFlow/Keras
-- PandExo/Pandeia
-- NumPy, Pandas, SciPy, scikit-learn, Matplotlib, Seaborn
-- MPI for the retrieval scripts
+Python 3.10 or newer is required. Python 3.12 is recommended for the PandExo
+notebooks. The retrieval scripts must run inside an environment where
+[POSEIDON](https://github.com/MartianColonist/POSEIDON), MultiNest, MPI, and
+`mpirun` are already working.
 
 Large opacity tables and some external model grids may need to be installed or
 downloaded outside the repository, depending on the experiment. The README files
@@ -105,18 +103,21 @@ inside each data folder describe the expected sources.
 
 ## Data and Generated Products
 
-The repository includes compact source data, notebooks, trained models, and a
-subset of retrieval products needed to inspect the paper workflow. Very large
-opacity tables are intentionally ignored by `.gitignore` and should be restored
-from their cited sources when rerunning the full spectral-generation steps.
+The repository includes source data, notebooks, trained models, and the
+Earth-like retrieval record used in the paper workflow. Very large training
+datasets, opacity tables, CIA data, and local PHOENIX grids are intentionally
+ignored by `.gitignore` and must be restored when rerunning the corresponding
+generation steps.
 
 The repository contents fall into three categories:
 
 - **Inputs**: `spec_data/`, `stellar_contamination/`, `waves.txt`, opacity/CIA
   files, and PandExo input spectra.
 - **Executable workflow**: numbered notebooks and Python/MPI scripts.
-- **Generated products**: trained `.keras` models, `.npz` uncertainty archives,
-  `POSEIDON_output/`, plots, logs, and campaign CSV summaries.
+- **Generated products**: trained `.keras` models, selected plots, and the
+  preserved `POSEIDON_output/`, logs, samples, state files, and CSV summaries
+  from the Earth-like retrieval experiment. Large local `.npz` datasets remain
+  ignored.
 
 ## License
 

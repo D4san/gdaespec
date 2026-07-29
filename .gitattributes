@@ -1,0 +1,17 @@
+* text=auto
+
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
+*.ipynb text eol=lf
+
+*.keras binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.webp binary
+*.fits binary
+*.zip binary

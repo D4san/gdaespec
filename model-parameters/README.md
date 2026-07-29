@@ -9,3 +9,9 @@ without walking through the full experiment workflow.
 
 The input files are `data/observation.dat` and `data/reference.dat`. The clean
 reference is used only to evaluate the reconstruction and prepare the plots.
+
+Install the repository dependencies from the project root:
+
+```bash
+pip install -r requirements.txt
+```

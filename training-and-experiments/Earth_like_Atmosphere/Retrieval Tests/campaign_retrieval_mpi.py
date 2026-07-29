@@ -16,7 +16,6 @@ import argparse
 import os
 import time
 import warnings
-from pathlib import Path
 
 import numpy as np
 from mpi4py import MPI
