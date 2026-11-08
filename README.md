@@ -2,27 +2,35 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Astronomy & Astrophysics](https://img.shields.io/badge/A%26A-Published-blue.svg)](https://doi.org/10.1051/0004-6361/202659009)
 [![arXiv](https://img.shields.io/badge/arXiv-2602.10330-b31b1b.svg)](https://arxiv.org/abs/2602.10330)
 
 <div align="center">
   <img src="gallery/G-DAE_logo.webp" alt="G-DAESpec logo" width="520"/>
 </div>
 
-This repository accompanies the paper:
+This repository accompanies the peer-reviewed article published in
+*Astronomy & Astrophysics*:
+
+**[Efficient reduction of stellar contamination and noise in planetary transmission spectra using neural networks](https://doi.org/10.1051/0004-6361/202659009)**
+
+**Publication:** [Astronomy & Astrophysics (2026)](https://www.aanda.org/articles/aa/abs/2026/10/aa59009-26/aa59009-26.html) · [DOI: 10.1051/0004-6361/202659009](https://doi.org/10.1051/0004-6361/202659009) · [arXiv:2602.10330](https://arxiv.org/abs/2602.10330)
+
+If you use G-DAESpec in your research, please cite the published article:
 
 ```bibtex
-@misc{duque-castano2026gdaespec,
+@article{duque-castano2026gdaespec,
    title = {Efficient reduction of stellar contamination and noise in planetary transmission spectra using neural networks},
-   author = {David S. Duque-Casta\~no and Lauren Flor-Torres and Jorge I. Zuluaga},
+   author = {David S. Duque-Casta{\\~n}o and Lauren Flor-Torres and Jorge I. Zuluaga},
+   journal = {Astronomy \\& Astrophysics},
    year = {2026},
+   doi = {10.1051/0004-6361/202659009},
+   url = {https://doi.org/10.1051/0004-6361/202659009},
    eprint = {2602.10330},
    archivePrefix = {arXiv},
-   primaryClass = {astro-ph.EP},
-   doi = {10.48550/arXiv.2602.10330},
-   url = {https://arxiv.org/abs/2602.10330}
+   primaryClass = {astro-ph.EP}
 }
 ```
-
 
 The code tests a General Denoising AutoEncoder (G-DAE) for transmission
 spectra affected by stellar contamination and observational noise. The project
