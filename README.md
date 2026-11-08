@@ -21,8 +21,8 @@ If you use G-DAESpec in your research, please cite the published article:
 ```bibtex
 @article{duque-castano2026gdaespec,
    title = {Efficient reduction of stellar contamination and noise in planetary transmission spectra using neural networks},
-   author = {David S. Duque-Casta{\\~n}o and Lauren Flor-Torres and Jorge I. Zuluaga},
-   journal = {Astronomy \\& Astrophysics},
+   author = {David S. Duque-Casta{\~n}o and Lauren Flor-Torres and Jorge I. Zuluaga},
+   journal = {Astronomy \& Astrophysics},
    year = {2026},
    doi = {10.1051/0004-6361/202659009},
    url = {https://doi.org/10.1051/0004-6361/202659009},
